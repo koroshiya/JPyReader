@@ -37,9 +37,9 @@ CMD_JUMP = 805
 
 HELP_ABOUT = 900
 
-WIDTH_MIN = 500
+WIDTH_MIN = 300
 WIDTH_INITIAL = 500
-HEIGHT_MIN = 400
+HEIGHT_MIN = 300
 HEIGHT_INITIAL = 400
 
 SUPPORTED_FORMATS = [".png", ".jpg", ".jpeg", ".gif", ".bmp"]
@@ -68,6 +68,10 @@ class JPyGUI(wx.Frame):
 		self.SetSize((WIDTH_INITIAL,HEIGHT_INITIAL));
 		self.SetMinSize((WIDTH_MIN,HEIGHT_MIN))
 		self.InitUI()
+		if len(sys.argv) > 1:
+			for arg in sys.argv:
+				if (self.DisplayImage(arg)):
+					break;
 
 	def InitUI(self):
 
