@@ -98,7 +98,7 @@ class JPyGUI(wx.Frame):
 		menuFile.AppendSeparator()
 		self.SetMenuItem(menuFile, FILE_CLOSE, '&Quit\tCtrl+Q', self.Exit);
 
-		self.SetMenuItem(menuView, VIEW_HIDE_MENU, '&Hide Menu\tCtrl+H', self.HideMenu);
+		#self.SetMenuItem(menuView, VIEW_HIDE_MENU, '&Hide Menu\tCtrl+H', self.HideMenu);
 		self.SetMenuItem(menuView, VIEW_HIDE_STATUS, 'Hide &Status\tCtrl+Shift+H', self.HideStatus);
 		self.SetMenuItem(menuView, VIEW_MAXIMIZE, '&Maximize\tCtrl+M', self.Max);
 		self.SetMenuItem(menuView, VIEW_FULLSCREEN, '&Fullscreen\tCtrl+F', self.Full);
@@ -190,15 +190,15 @@ class JPyGUI(wx.Frame):
 		self.SwitchImage(0, total, -1, total);
 
 	def First(self, e):
-		total = self.TOTAL_LEN - 1
-		if (total > 0):
-			self.CUR_INDEX = 0;
-			self.DisplayImageAtIndex();
+		self.MoveToImage(0);
 
 	def Last(self, e):
+		self.MoveToImage(self.TOTAL_LEN - 1);
+
+	def MoveToImage(self, target):
 		total = self.TOTAL_LEN - 1
 		if (total > 0):
-			self.CUR_INDEX = total;
+			self.CUR_INDEX = target;
 			self.DisplayImageAtIndex();
 
 	def SwitchImage(self, indexOne, indexTwo, inc, total):
@@ -212,13 +212,15 @@ class JPyGUI(wx.Frame):
 				return True
 		return False
 
-	def DisplayImage(self, imageFile): 
-		if not self.IsSupportedImage(imageFile):
-			return False
-		curdir = dirname(realpath(imageFile))
+	def IndexFilesInDirectory(self, curdir):
 		INDEXED_FILES[:] = []
 		for format in SUPPORTED_FORMATS:
 			INDEXED_FILES.extend(glob.glob(curdir + "/*" + format));
+
+	def DisplayImage(self, imageFile): 
+		if not self.IsSupportedImage(imageFile):
+			return False
+		self.IndexFilesInDirectory(dirname(realpath(imageFile)))
 		self.CUR_INDEX = 0
 		for filec in INDEXED_FILES:
 			if (filec == imageFile):
@@ -258,26 +260,14 @@ class JPyGUI(wx.Frame):
 			self.Thaw()
 			return False
 
-	def HideMenu(self, e):
-		self.HideBar(self.menubar)
+	#def HideMenu(self, e):
+	#	self.HideBar(self.menubar)
 
 	def HideStatus(self, e):
 		self.HideBar(self.statusbar)
 
 	def HideBar(self, bar):
-		siz = bar.GetSize()
-		fsiz = self.panel.GetSize()
-		width = fsiz.GetWidth()
-		height = fsiz.GetHeight()
-		if bar.IsShown():
-			bar.Hide();
-			height += siz.GetHeight()
-		else:
-			bar.Show()
-			height -= siz.GetHeight()
-		self.panel.SetSize((width, height))
-		print "before: " + str(fsiz)
-		print "after: " + str(self.panel.GetSize())
+		bar.Hide() if bar.IsShown() else bar.Show();
 
 	def onKey(self, event): 
 	    keycode = event.GetKeyCode() 
