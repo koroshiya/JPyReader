@@ -34,6 +34,8 @@ CMD_NEXT = 802
 CMD_FIRST = 803
 CMD_LAST = 804
 
+HELP_ABOUT = 900
+
 WIDTH_MIN = 500
 WIDTH_INITIAL = 500
 HEIGHT_MIN = 400
@@ -92,6 +94,7 @@ class JPyGUI(wx.Frame):
 		menuView = wx.Menu()
 		menuCommands = wx.Menu()
 		menuSettings = wx.Menu()
+		menuHelp = wx.Menu()
 
 		self.SetMenuItem(menuFile, FILE_OPEN_DIRECTORY, '&Open\tCtrl+O', self.Import);
 		self.SetMenuItem(menuFile, FILE_OPEN_ARCHIVE, '&Open Archive\tCtrl+Z', self.Export);
@@ -108,12 +111,15 @@ class JPyGUI(wx.Frame):
 		self.SetMenuItem(menuCommands, CMD_FIRST, '&First\tCtrl+Shift+LEFT', self.First);
 		self.SetMenuItem(menuCommands, CMD_LAST, '&Last\tCtrl+Shift+RIGHT', self.Last);
 
+		self.SetMenuItem(menuHelp, HELP_ABOUT, '&About', self.About);
+
 		#menuItemOpen.SetBitmap(wx.Bitmap('file.png'))
 
 		self.menubar.Append(menuFile, '&File')
 		self.menubar.Append(menuView, '&View')
 		self.menubar.Append(menuCommands, '&Commands')
 		self.menubar.Append(menuSettings, '&Settings')
+		self.menubar.Append(menuHelp, '&Help')
 
 		self.statusbar = self.CreateStatusBar()
 		self.SetMenuBar(self.menubar);
@@ -269,12 +275,14 @@ class JPyGUI(wx.Frame):
 	def HideBar(self, bar):
 		bar.Hide() if bar.IsShown() else bar.Show();
 
-	def onKey(self, event): 
-	    keycode = event.GetKeyCode() 
-	    print keycode
-	    if keycode == wx.WXK_LEFT: 
-	            print 'You pressed left arrow!' 
-	    event.Skip() 
+	def About(self, e):
+		info = wx.AboutDialogInfo()
+		info.SetIcon(self.GetIcon()) #wx.Icon('jr.png', wx.BITMAP_TYPE_PNG)
+		info.SetName("JPy-Reader")
+		info.SetVersion("1.0")
+		info.SetDescription("Test description")
+		info.SetCopyright("(C) 2013 Koroshiya")
+		wx.AboutBox(info)
 
 class FileDrop(wx.FileDropTarget):
 	def __init__(self, window):
