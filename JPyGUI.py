@@ -29,6 +29,11 @@ VIEW_HIDE_STATUS = 701
 VIEW_MAXIMIZE = 702
 VIEW_FULLSCREEN = 703
 
+CMD_PREVIOUS = 801
+CMD_NEXT = 802
+CMD_FIRST = 803
+CMD_LAST = 804
+
 WIDTH_MIN = 500
 WIDTH_INITIAL = 500
 HEIGHT_MIN = 400
@@ -55,7 +60,7 @@ class JPyGUI(wx.Frame):
 		self.Bind(wx.EVT_CLOSE, self.Exit)
 
 		self.SetBackgroundColour(wx.BLACK)
-		self.SetTitle("Jpy-reader")
+		self.SetTitle("JPy-Reader")
 		self.SetIcon(wx.Icon('jr.png', wx.BITMAP_TYPE_PNG))
 		self.SetSize((WIDTH_INITIAL,HEIGHT_INITIAL));
 		self.SetMinSize((WIDTH_MIN,HEIGHT_MIN))
@@ -85,6 +90,7 @@ class JPyGUI(wx.Frame):
 		self.menubar = wx.MenuBar();
 		menuFile = wx.Menu()
 		menuView = wx.Menu()
+		menuCommands = wx.Menu()
 		menuSettings = wx.Menu()
 
 		self.SetMenuItem(menuFile, FILE_OPEN_DIRECTORY, '&Open\tCtrl+O', self.Import);
@@ -97,10 +103,16 @@ class JPyGUI(wx.Frame):
 		self.SetMenuItem(menuView, VIEW_MAXIMIZE, '&Maximize\tCtrl+M', self.Max);
 		self.SetMenuItem(menuView, VIEW_FULLSCREEN, '&Fullscreen\tCtrl+F', self.Full);
 
+		self.SetMenuItem(menuCommands, CMD_PREVIOUS, '&Previous\tCtrl+LEFT', self.Previous);
+		self.SetMenuItem(menuCommands, CMD_NEXT, '&Next\tCtrl+RIGHT', self.Next);
+		self.SetMenuItem(menuCommands, CMD_FIRST, '&First\tCtrl+Shift+LEFT', self.First);
+		self.SetMenuItem(menuCommands, CMD_LAST, '&Last\tCtrl+Shift+RIGHT', self.Last);
+
 		#menuItemOpen.SetBitmap(wx.Bitmap('file.png'))
 
 		self.menubar.Append(menuFile, '&File')
 		self.menubar.Append(menuView, '&View')
+		self.menubar.Append(menuCommands, '&Commands')
 		self.menubar.Append(menuSettings, '&Settings')
 
 		self.statusbar = self.CreateStatusBar()
@@ -176,6 +188,18 @@ class JPyGUI(wx.Frame):
 	def Previous(self, e):
 		total = self.TOTAL_LEN - 1
 		self.SwitchImage(0, total, -1, total);
+
+	def First(self, e):
+		total = self.TOTAL_LEN - 1
+		if (total > 0):
+			self.CUR_INDEX = 0;
+			self.DisplayImageAtIndex();
+
+	def Last(self, e):
+		total = self.TOTAL_LEN - 1
+		if (total > 0):
+			self.CUR_INDEX = total;
+			self.DisplayImageAtIndex();
 
 	def SwitchImage(self, indexOne, indexTwo, inc, total):
 		if (total > 0):
@@ -254,6 +278,13 @@ class JPyGUI(wx.Frame):
 		self.panel.SetSize((width, height))
 		print "before: " + str(fsiz)
 		print "after: " + str(self.panel.GetSize())
+
+	def onKey(self, event): 
+	    keycode = event.GetKeyCode() 
+	    print keycode
+	    if keycode == wx.WXK_LEFT: 
+	            print 'You pressed left arrow!' 
+	    event.Skip() 
 
 class FileDrop(wx.FileDropTarget):
 	def __init__(self, window):
