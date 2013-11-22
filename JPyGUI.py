@@ -33,6 +33,7 @@ CMD_PREVIOUS = 801
 CMD_NEXT = 802
 CMD_FIRST = 803
 CMD_LAST = 804
+CMD_JUMP = 805
 
 HELP_ABOUT = 900
 
@@ -110,6 +111,8 @@ class JPyGUI(wx.Frame):
 		self.SetMenuItem(menuCommands, CMD_NEXT, '&Next\tCtrl+RIGHT', self.Next);
 		self.SetMenuItem(menuCommands, CMD_FIRST, '&First\tCtrl+Shift+LEFT', self.First);
 		self.SetMenuItem(menuCommands, CMD_LAST, '&Last\tCtrl+Shift+RIGHT', self.Last);
+		menuCommands.AppendSeparator();
+		self.SetMenuItem(menuCommands, CMD_JUMP, '&Jump to page...\tCtrl+J', self.JumpToPage)
 
 		self.SetMenuItem(menuHelp, HELP_ABOUT, '&About', self.About);
 
@@ -206,6 +209,17 @@ class JPyGUI(wx.Frame):
 		if (total > 0):
 			self.CUR_INDEX = target;
 			self.DisplayImageAtIndex();
+
+	def JumpToPage(self, e):
+		if self.TOTAL_LEN > 0:
+			td = wx.TextEntryDialog(self,"Enter number of page to skip to")
+			td.ShowModal();
+			val = td.GetValue()
+			if (len(val) > 0 and val.isdigit()):
+				val = int(val) - 1
+				if val >= 0 and val < self.TOTAL_LEN:
+					self.CUR_INDEX = val
+					self.DisplayImageAtIndex();
 
 	def SwitchImage(self, indexOne, indexTwo, inc, total):
 		if (total > 0):
