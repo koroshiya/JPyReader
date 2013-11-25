@@ -257,6 +257,7 @@ class JPyGUI(wx.Frame):
 		INDEXED_FILES[:] = []
 		for format in SUPPORTED_FORMATS:
 			INDEXED_FILES.extend(glob.glob(curdir + "/*" + format));
+		INDEXED_FILES.sort();
 
 	def DisplayImage(self, imageFile): 
 		if not self.IsSupportedImage(imageFile):
