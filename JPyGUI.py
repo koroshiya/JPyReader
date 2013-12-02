@@ -54,7 +54,7 @@ class JPyGUI(wx.Frame):
 		self.CUR_INDEX = 0
 		self.TOTAL_LEN = 0
 		self.SCALE = 1
-		self.CACHE = ""
+		self.CACHE = ["","",""]
 		self.displays = (wx.Display(i) for i in range(wx.Display.GetCount()))
 		self.sizes = [display.GetGeometry().GetSize() for display in self.displays]
 
@@ -213,11 +213,11 @@ class JPyGUI(wx.Frame):
 
 	def Next(self, e):
 		total = self.TOTAL_LEN - 1;
-		self.SwitchImage(total, 0, 1, total);
+		self.SwitchImage(total, 0, 1, 2, 0);
 
 	def Previous(self, e):
-		total = self.TOTAL_LEN - 1
-		self.SwitchImage(0, total, -1, total);
+		total = self.TOTAL_LEN - 1;
+		self.SwitchImage(0, total, -1, 0, 2);
 
 	def First(self, e):
 		self.MoveToImage(0);
@@ -229,6 +229,7 @@ class JPyGUI(wx.Frame):
 		total = self.TOTAL_LEN - 1
 		if (total > 0):
 			self.CUR_INDEX = target;
+			self.CACHE = ["","",""]
 			self.DisplayImageAtIndex();
 
 	def JumpToPage(self, e):
@@ -242,10 +243,17 @@ class JPyGUI(wx.Frame):
 					self.CUR_INDEX = val
 					self.DisplayImageAtIndex();
 
-	def SwitchImage(self, indexOne, indexTwo, inc, total):
-		if (total > 0):
-			self.CUR_INDEX = indexTwo if self.CUR_INDEX == indexOne else self.CUR_INDEX + inc
+	def SwitchImage(self, indexOne, indexTwo, inc, cachePrimary, cacheSecondary):
+		self.CACHE[cacheSecondary] = self.CACHE[1];
+
+		if (self.CACHE[cachePrimary] != ""):
+			self.CACHE[1] = self.CACHE[cachePrimary];
+			self.CACHE[cachePrimary] = "";
+		self.CUR_INDEX = indexTwo if self.CUR_INDEX == indexOne else self.CUR_INDEX + inc
+		if (self.CACHE[1] != ""):
 			self.DisplayImageAtIndex();
+		else:
+			self.DisplayCachedImage(1);
 
 	def IsSupportedImage(self, image):
 		for format in SUPPORTED_FORMATS:
@@ -275,36 +283,15 @@ class JPyGUI(wx.Frame):
 
 	def DisplayImageAtIndex(self):
 		tmpIndex = INDEXED_FILES[self.CUR_INDEX]
+		self.Freeze()
 		try:
-			self.Freeze()
-			self.CACHE = wx.Image(tmpIndex, wx.BITMAP_TYPE_ANY)
-			x, y = self.CACHE.GetSize()
-			jpg1 = self.CACHE.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap();
+			self.CACHE[1] = wx.Image(tmpIndex, wx.BITMAP_TYPE_ANY)
+			x, y = self.CACHE[1].GetSize()
+			jpg1 = self.CACHE[1].Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap();
 			
-			cnt = 0
-			while cnt < 2:
-				self.spanel.FitInside();
-				self.panel.SetBitmap(jpg1);
-				self.panel.SetClientSize(jpg1.GetSize());
-				
-				self.statusbar.SetStatusText(str(self.CUR_INDEX + 1) + "/" + str(self.TOTAL_LEN) + " - " + tmpIndex)
-				
-				#self.spanel.SetClientSize(self.panel.GetSize() + (width, height))
-				self.spanel.SetVirtualSize(jpg1.GetSize())
-				self.spanel.SetClientSize(jpg1.GetSize())
-				#self.SetClientSize((1920,1080))
-				self.SetClientSize(jpg1.GetSize())
-				#self.SetSize((1920,1080))
-				#self.Fit();
+			self.statusbar.SetStatusText(str(self.CUR_INDEX + 1) + "/" + str(self.TOTAL_LEN) + " - " + tmpIndex)
 
-				self.spanel.SetScrollbars(1,1,1,1)
-				self.spanel.SetScrollRate(20,20)
-				self.spanel.FitInside();
-				self.FitInside();
-				self.Update();
-				self.panel.Update();
-				self.spanel.Update();
-				cnt += 1
+			self.PaintImage(jpg1)
 
 			self.Thaw()
 			return True
@@ -313,36 +300,15 @@ class JPyGUI(wx.Frame):
 			self.Thaw()
 			return False
 
-	def DisplayCachedImage(self):
+	def DisplayCachedImage(self, index):
 		tmpIndex = INDEXED_FILES[self.CUR_INDEX]
+		self.Freeze()
 		try:
-			self.Freeze()
-			jpg1 = self.CACHE
+			jpg1 = self.CACHE[index]
 			x, y = jpg1.GetSize()
 			jpg1 = jpg1.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap();
 			
-			cnt = 0
-			while cnt < 2:
-				self.spanel.FitInside();
-				self.panel.SetBitmap(jpg1);
-				self.panel.SetClientSize(jpg1.GetSize());
-				
-				#self.spanel.SetClientSize(self.panel.GetSize() + (width, height))
-				self.spanel.SetVirtualSize(jpg1.GetSize())
-				self.spanel.SetClientSize(jpg1.GetSize())
-				#self.SetClientSize((1920,1080))
-				self.SetClientSize(jpg1.GetSize())
-				#self.SetSize((1920,1080))
-				#self.Fit();
-
-				self.spanel.SetScrollbars(1,1,1,1)
-				self.spanel.SetScrollRate(20,20)
-				self.spanel.FitInside();
-				self.FitInside();
-				self.Update();
-				self.panel.Update();
-				self.spanel.Update();
-				cnt += 1
+			self.PaintImage(jpg1)
 
 			self.Thaw()
 			return True
@@ -350,6 +316,20 @@ class JPyGUI(wx.Frame):
 			print "Image file %s not found" % tmpIndex
 			self.Thaw()
 			return False
+
+	def PaintImage(self, jpg1):
+		self.spanel.FitInside();
+		self.spanel.SetScrollbars(1,1,1,1)
+		self.spanel.SetScrollRate(20,20)
+		
+		self.spanel.SetClientSize(jpg1.GetSize())
+		self.spanel.SetVirtualSize((1920, 1080))
+		self.spanel.SetVirtualSize(jpg1.GetSize())
+		self.panel.SetBitmap(jpg1);
+		self.panel.SetClientSize(jpg1.GetSize());
+		self.SetClientSize(jpg1.GetSize())
+
+		self.spanel.FitInside();
 
 	#def HideMenu(self, e):
 	#	self.HideBar(self.menubar)
