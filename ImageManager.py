@@ -30,8 +30,8 @@ class ImageManager():
 			self.frame.panel.SetPosition((0,0))
 			self.frame.DisplayCachedImage(1);
 		else:
-			self.Maximize(True);
-			self.CenterImage();
+			self.frame.Maximize(True);
+			self.frame.CenterImage();
 
 	def Min(self, e):
 		self.frame.Iconize(not self.IsIconized())

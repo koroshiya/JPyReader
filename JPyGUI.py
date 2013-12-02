@@ -71,6 +71,7 @@ class JPyGUI(wx.Frame):
 
 		self.ConstructMenu();
 		self.spanel = wx.PyScrolledWindow(self)
+		self.spanel.SetDoubleBuffered(True)
 		self.spanel.SetScrollbars(1,1,1,1)
 		self.spanel.SetScrollRate(1,1)
 		self.spanel.SetPosition((0,0));
