@@ -174,6 +174,7 @@ class JPyGUI(wx.Frame):
 		if (self.IsMaximized()):
 			self.Maximize(False);
 			self.panel.SetPosition((0,0))
+			self.DisplayCachedImage(1);
 		else:
 			self.Maximize(True);
 			self.CenterImage();
@@ -301,21 +302,22 @@ class JPyGUI(wx.Frame):
 			return False
 
 	def DisplayCachedImage(self, index):
-		tmpIndex = INDEXED_FILES[self.CUR_INDEX]
-		self.Freeze()
-		try:
-			jpg1 = self.CACHE[index]
-			x, y = jpg1.GetSize()
-			jpg1 = jpg1.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap();
-			
-			self.PaintImage(jpg1)
+		if (self.TOTAL_LEN > 0):
+			tmpIndex = INDEXED_FILES[self.CUR_INDEX]
+			self.Freeze()
+			try:
+				jpg1 = self.CACHE[index]
+				x, y = jpg1.GetSize()
+				jpg1 = jpg1.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap();
+				
+				self.PaintImage(jpg1)
 
-			self.Thaw()
-			return True
-		except IOError:
-			print "Image file %s not found" % tmpIndex
-			self.Thaw()
-			return False
+				self.Thaw()
+				return True
+			except IOError:
+				print "Image file %s not found" % tmpIndex
+				self.Thaw()
+				return False
 
 	def PaintImage(self, jpg1):
 		self.spanel.FitInside();
