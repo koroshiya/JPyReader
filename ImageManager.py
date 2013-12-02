@@ -28,10 +28,11 @@ class ImageManager():
 		if (self.frame.IsMaximized()):
 			self.frame.Maximize(False);
 			self.frame.panel.SetPosition((0,0))
-			self.frame.DisplayCachedImage(1);
 		else:
 			self.frame.Maximize(True);
-			self.frame.CenterImage();
+			self.CenterImage();
+
+		print self.frame.panel.GetPosition();
 
 	def Min(self, e):
 		self.frame.Iconize(not self.IsIconized())
@@ -42,15 +43,11 @@ class ImageManager():
 			self.frame.panel.SetPosition((0,0))
 		else:
 			self.frame.ShowFullScreen(True, style=wx.FULLSCREEN_ALL);
-			self.frame.CenterImage();
+			self.CenterImage();
 
 	def CenterImage(self):
-		psize = self.frame.panel.GetSize()
-		monitor = self.frame.sizes[self.GetMonitor()]
-		x = psize.GetWidth()
-		x2 = monitor.GetWidth()
-		y = psize.GetHeight()
-		y2 = monitor.GetHeight()
+		x, y = self.frame.panel.GetSize()
+		x2, y2 = self.frame.sizes[self.frame.GetMonitor()]
 
 		width = 0 if (x > x2) else (x2 / 2 - x / 2)
 		height = 0 if (y > y2) else (y2 / 2 - y / 2)
@@ -174,5 +171,7 @@ class ImageManager():
 		self.frame.panel.SetBitmap(jpg1);
 		self.frame.panel.SetClientSize(jpg1.GetSize());
 		self.frame.SetClientSize(jpg1.GetSize())
+		if (self.frame.IsFullScreen() or self.frame.IsMaximized()):
+			self.CenterImage()
 
 		self.frame.spanel.FitInside();
