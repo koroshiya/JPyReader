@@ -1,9 +1,9 @@
 try:
 	import wx
 except ImportError:
-	print "You do not appear to have wxpython installed.\n"
-	print "Without wxpython, this program cannot run.\n"
-	print "You can download wxpython at: http://www.wxpython.org/download.php#stable \n"
+	print ("You do not appear to have wxpython installed.\n")
+	print ("Without wxpython, this program cannot run.\n")
+	print ("You can download wxpython at: http://www.wxpython.org/download.php#stable \n")
 	sys.exit()
 
 from os.path import dirname
