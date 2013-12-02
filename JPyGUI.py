@@ -54,7 +54,7 @@ class JPyGUI(wx.Frame):
 		self.CUR_INDEX = 0
 		self.TOTAL_LEN = 0
 		self.SCALE = 1
-		self.CACHE = ["","",""]
+		self.CACHE = [["",""],["",""],["",""]]
 		self.displays = (wx.Display(i) for i in range(wx.Display.GetCount()))
 		self.sizes = [display.GetGeometry().GetSize() for display in self.displays]
 
@@ -230,7 +230,7 @@ class JPyGUI(wx.Frame):
 		total = self.TOTAL_LEN - 1
 		if (total > 0):
 			self.CUR_INDEX = target;
-			self.CACHE = ["","",""]
+			self.CACHE = [["",""],["",""],["",""]]
 			self.DisplayImageAtIndex();
 
 	def JumpToPage(self, e):
@@ -286,12 +286,11 @@ class JPyGUI(wx.Frame):
 		tmpIndex = INDEXED_FILES[self.CUR_INDEX]
 		self.Freeze()
 		try:
-			self.CACHE[1] = wx.Image(tmpIndex, wx.BITMAP_TYPE_ANY)
-			x, y = self.CACHE[1].GetSize()
-			jpg1 = self.CACHE[1].Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap();
+			self.CACHE[1][0] = wx.Image(tmpIndex, wx.BITMAP_TYPE_ANY)
+			self.CACHE[1][1] = tmpIndex
+			x, y = self.CACHE[1][0].GetSize()
+			jpg1 = self.CACHE[1][0].Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap();
 			
-			self.statusbar.SetStatusText(str(self.CUR_INDEX + 1) + "/" + str(self.TOTAL_LEN) + " - " + tmpIndex)
-
 			self.PaintImage(jpg1)
 
 			self.Thaw()
@@ -306,7 +305,7 @@ class JPyGUI(wx.Frame):
 			tmpIndex = INDEXED_FILES[self.CUR_INDEX]
 			self.Freeze()
 			try:
-				jpg1 = self.CACHE[index]
+				jpg1 = self.CACHE[index][0]
 				x, y = jpg1.GetSize()
 				jpg1 = jpg1.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap();
 				
@@ -320,6 +319,7 @@ class JPyGUI(wx.Frame):
 				return False
 
 	def PaintImage(self, jpg1):
+		self.statusbar.SetStatusText(str(self.CUR_INDEX + 1) + "/" + str(self.TOTAL_LEN) + " - " + self.CACHE[1][1])
 		self.spanel.FitInside();
 		self.spanel.SetScrollbars(1,1,1,1)
 		self.spanel.SetScrollRate(20,20)
