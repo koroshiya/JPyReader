@@ -25,8 +25,8 @@ class ImageManager():
 		self.frame = frame;
 
 	def Max(self, e):
-		if (self.IsMaximized()):
-			self.Maximize(False);
+		if (self.frame.IsMaximized()):
+			self.frame.Maximize(False);
 			self.frame.panel.SetPosition((0,0))
 			self.frame.DisplayCachedImage(1);
 		else:
@@ -34,19 +34,19 @@ class ImageManager():
 			self.CenterImage();
 
 	def Min(self, e):
-		self.Iconize(not self.IsIconized())
+		self.frame.Iconize(not self.IsIconized())
 
 	def Full(self, e):
-		if (self.IsFullScreen()):
-			self.ShowFullScreen(False);
+		if (self.frame.IsFullScreen()):
+			self.frame.ShowFullScreen(False);
 			self.frame.panel.SetPosition((0,0))
 		else:
-			self.ShowFullScreen(True, style=wx.FULLSCREEN_ALL);
-			self.CenterImage();
+			self.frame.ShowFullScreen(True, style=wx.FULLSCREEN_ALL);
+			self.frame.CenterImage();
 
 	def CenterImage(self):
-		psize = self.panel.GetSize()
-		monitor = self.sizes[self.GetMonitor()]
+		psize = self.frame.panel.GetSize()
+		monitor = self.frame.sizes[self.GetMonitor()]
 		x = psize.GetWidth()
 		x2 = monitor.GetWidth()
 		y = psize.GetHeight()

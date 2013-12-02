@@ -42,6 +42,7 @@ class JPyGUI(wx.Frame):
 	def __init__(self, *args, **kwargs):
 		super(JPyGUI, self).__init__(*args, **kwargs)
 
+		self.SetDoubleBuffered(True)
 		self.displays = (wx.Display(i) for i in range(wx.Display.GetCount()))
 		self.sizes = [display.GetGeometry().GetSize() for display in self.displays]
 		self.image_manager = ImageManager.ImageManager();
