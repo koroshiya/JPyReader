@@ -54,38 +54,37 @@ class ImageManager():
 		self.frame.panel.SetPosition((width, height))
 
 	def Next(self, e):
-		total = self.TOTAL_LEN - 1;
-		self.SwitchImage(total, 0, 1, 2, 0);
+		self.SwitchImage(True);
 
 	def Previous(self, e):
-		total = self.TOTAL_LEN - 1;
-		self.SwitchImage(0, total, -1, 0, 2);
+		self.SwitchImage(False);
 
 	def First(self, e):
 		self.MoveToImage(0);
 
 	def Last(self, e):
-		self.MoveToImage(self.TOTAL_LEN - 1);
+		self.MoveToImage(self.TOTAL_LEN);
 
 	def MoveToImage(self, target):
-		total = self.TOTAL_LEN - 1
-		if (total > 0):
+		if (self.TOTAL_LEN > 0):
 			self.CUR_INDEX = target;
 			self.CACHE = [["",""],["",""],["",""]]
 			self.DisplayImageAtIndex();
 
 	def JumpToPage(self, e):
-		if self.TOTAL_LEN > 0:
+		if self.TOTAL_LEN >= 0:
 			td = wx.TextEntryDialog(self,"Enter number of page to skip to")
 			td.ShowModal();
 			val = td.GetValue()
 			if (len(val) > 0 and val.isdigit()):
 				val = int(val) - 1
-				if val >= 0 and val < self.TOTAL_LEN:
+				if val >= 0 and val <= self.TOTAL_LEN:
 					self.CUR_INDEX = val
 					self.DisplayImageAtIndex();
 
-	def SwitchImage(self, indexOne, indexTwo, inc, cachePrimary, cacheSecondary):
+	def SwitchImage(self, boolForward):
+		total = self.TOTAL_LEN;
+		indexOne, indexTwo, inc, cachePrimary, cacheSecondary = (total, 0, 1, 2, 0) if boolForward else (0, total, -1, 0, 2)
 		self.CACHE[cacheSecondary] = self.CACHE[1];
 
 		if (self.CACHE[cachePrimary] != ""):
@@ -118,8 +117,8 @@ class ImageManager():
 			if (filec == imageFile):
 				break;
 			self.CUR_INDEX += 1
-		self.TOTAL_LEN = len(INDEXED_FILES)
-		if self.CUR_INDEX >= self.TOTAL_LEN:
+		self.TOTAL_LEN = len(INDEXED_FILES) - 1
+		if self.CUR_INDEX > self.TOTAL_LEN:
 			self.CUR_INDEX = 0
 		return self.DisplayImageAtIndex()
 
@@ -142,7 +141,7 @@ class ImageManager():
 			return False
 
 	def DisplayCachedImage(self, index):
-		if (self.TOTAL_LEN > 0):
+		if (self.TOTAL_LEN > -1):
 			tmpIndex = INDEXED_FILES[self.CUR_INDEX]
 			self.frame.Freeze()
 			try:
@@ -160,7 +159,7 @@ class ImageManager():
 				return False
 
 	def PaintImage(self, jpg1):
-		self.frame.statusbar.SetStatusText(str(self.CUR_INDEX + 1) + "/" + str(self.TOTAL_LEN) + " - " + self.CACHE[1][1])
+		self.frame.statusbar.SetStatusText(str(self.CUR_INDEX + 1) + "/" + str(self.TOTAL_LEN + 1) + " - " + self.CACHE[1][1])
 		self.frame.spanel.FitInside();
 		self.frame.spanel.SetScrollbars(1,1,1,1)
 		self.frame.spanel.SetScrollRate(20,20)
