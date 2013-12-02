@@ -12,13 +12,10 @@ except ImportError:
 	print "Without wxpython, this program cannot run.\n"
 	print "You can download wxpython at: http://www.wxpython.org/download.php#stable \n"
 	sys.exit()
-from os.path import expanduser
-from os.path import realpath
-from os.path import isfile
-from os.path import dirname
 from threading import Thread
 import wx.lib.scrolledpanel as scrolled
-import glob
+import Settings
+import ImageManager
 
 FILE_OPEN_DIRECTORY = 650
 FILE_OPEN_ARCHIVE = 651
@@ -37,26 +34,15 @@ CMD_JUMP = 805
 
 HELP_ABOUT = 900
 
-WIDTH_MIN = 300
-WIDTH_INITIAL = 500
-HEIGHT_MIN = 300
-HEIGHT_INITIAL = 400
-
-SUPPORTED_FORMATS = [".png", ".jpg", ".jpeg", ".gif", ".bmp"]
-
-INDEXED_FILES = []
-
 class JPyGUI(wx.Frame):
 
 	def __init__(self, *args, **kwargs):
 		super(JPyGUI, self).__init__(*args, **kwargs)
 
-		self.CUR_INDEX = 0
-		self.TOTAL_LEN = 0
-		self.SCALE = 1
-		self.CACHE = [["",""],["",""],["",""]]
 		self.displays = (wx.Display(i) for i in range(wx.Display.GetCount()))
 		self.sizes = [display.GetGeometry().GetSize() for display in self.displays]
+		self.image_manager = ImageManager.ImageManager();
+		self.image_manager.SetFrame(self);
 
 		dt = FileDrop(self)
 		dt.SetFrame(self)
@@ -67,8 +53,10 @@ class JPyGUI(wx.Frame):
 		self.SetBackgroundColour(wx.BLACK)
 		self.SetTitle("JPy-Reader")
 		self.SetIcon(wx.Icon('jr.png', wx.BITMAP_TYPE_PNG))
-		self.SetSize((WIDTH_INITIAL,HEIGHT_INITIAL));
-		self.SetMinSize((WIDTH_MIN,HEIGHT_MIN))
+		self.Settings = Settings.Settings();
+		self.SetSize(self.Settings.size_init);
+		self.SetMinSize(self.Settings.size_min);
+		self.SetPosition(self.Settings.screen_pos)
 		self.InitUI()
 		if len(sys.argv) > 1:
 			for arg in sys.argv:
@@ -86,10 +74,10 @@ class JPyGUI(wx.Frame):
 
 		self.panel = wx.StaticBitmap(self.spanel)
 
-		self.panel.Bind(wx.EVT_LEFT_UP, self.Next)
-		self.Bind(wx.EVT_LEFT_UP, self.Next)
-		self.panel.Bind(wx.EVT_RIGHT_UP, self.Previous)
-		self.Bind(wx.EVT_RIGHT_UP, self.Previous)
+		self.panel.Bind(wx.EVT_LEFT_UP, self.image_manager.Next)
+		self.Bind(wx.EVT_LEFT_UP, self.image_manager.Next)
+		self.panel.Bind(wx.EVT_RIGHT_UP, self.image_manager.Previous)
+		self.Bind(wx.EVT_RIGHT_UP, self.image_manager.Previous)
 		self.panel.SetPosition((0,0));
 
 		self.Bind(wx.EVT_MOUSEWHEEL, self.Print)
@@ -125,15 +113,15 @@ class JPyGUI(wx.Frame):
 
 		#self.SetMenuItem(menuView, VIEW_HIDE_MENU, '&Hide Menu\tCtrl+H', self.HideMenu);
 		self.SetMenuItem(menuView, VIEW_HIDE_STATUS, 'Hide &Status\tCtrl+Shift+H', self.HideStatus);
-		self.SetMenuItem(menuView, VIEW_MAXIMIZE, '&Maximize\tCtrl+M', self.Max);
-		self.SetMenuItem(menuView, VIEW_FULLSCREEN, '&Fullscreen\tCtrl+F', self.Full);
+		self.SetMenuItem(menuView, VIEW_MAXIMIZE, '&Maximize\tCtrl+M', self.image_manager.Max);
+		self.SetMenuItem(menuView, VIEW_FULLSCREEN, '&Fullscreen\tCtrl+F', self.image_manager.Full);
 
-		self.SetMenuItem(menuCommands, CMD_PREVIOUS, '&Previous\tCtrl+LEFT', self.Previous);
-		self.SetMenuItem(menuCommands, CMD_NEXT, '&Next\tCtrl+RIGHT', self.Next);
-		self.SetMenuItem(menuCommands, CMD_FIRST, '&First\tCtrl+Shift+LEFT', self.First);
-		self.SetMenuItem(menuCommands, CMD_LAST, '&Last\tCtrl+Shift+RIGHT', self.Last);
+		self.SetMenuItem(menuCommands, CMD_PREVIOUS, '&Previous\tCtrl+LEFT', self.image_manager.Previous);
+		self.SetMenuItem(menuCommands, CMD_NEXT, '&Next\tCtrl+RIGHT', self.image_manager.Next);
+		self.SetMenuItem(menuCommands, CMD_FIRST, '&First\tCtrl+Shift+LEFT', self.image_manager.First);
+		self.SetMenuItem(menuCommands, CMD_LAST, '&Last\tCtrl+Shift+RIGHT', self.image_manager.Last);
 		menuCommands.AppendSeparator();
-		self.SetMenuItem(menuCommands, CMD_JUMP, '&Jump to page...\tCtrl+J', self.JumpToPage)
+		self.SetMenuItem(menuCommands, CMD_JUMP, '&Jump to page...\tCtrl+J', self.image_manager.JumpToPage)
 
 		self.SetMenuItem(menuHelp, HELP_ABOUT, '&About', self.About);
 
@@ -168,39 +156,8 @@ class JPyGUI(wx.Frame):
 		self.URLList.LoadFile(openFileDialog.GetPath())
 
 	def Exit(self, e):
+		self.Settings.write(self);
 		wx.Exit()
-
-	def Max(self, e):
-		if (self.IsMaximized()):
-			self.Maximize(False);
-			self.panel.SetPosition((0,0))
-			self.DisplayCachedImage(1);
-		else:
-			self.Maximize(True);
-			self.CenterImage();
-
-	def Min(self, e):
-		self.Iconize(not self.IsIconized())
-
-	def Full(self, e):
-		if (self.IsFullScreen()):
-			self.ShowFullScreen(False);
-			self.panel.SetPosition((0,0))
-		else:
-			self.ShowFullScreen(True, style=wx.FULLSCREEN_ALL);
-			self.CenterImage();
-
-	def CenterImage(self):
-		psize = self.panel.GetSize()
-		monitor = self.sizes[self.GetMonitor()]
-		x = psize.GetWidth()
-		x2 = monitor.GetWidth()
-		y = psize.GetHeight()
-		y2 = monitor.GetHeight()
-
-		width = 0 if (x > x2) else (x2 / 2 - x / 2)
-		height = 0 if (y > y2) else (y2 / 2 - y / 2)
-		self.panel.SetPosition((width, height))
 
 	def GetMonitor(self):
 		posx, posy = self.GetScreenPosition()
@@ -211,127 +168,6 @@ class JPyGUI(wx.Frame):
 			count += 1
 			posx -= monitor.GetWidth()
 		return 0
-
-	def Next(self, e):
-		total = self.TOTAL_LEN - 1;
-		self.SwitchImage(total, 0, 1, 2, 0);
-
-	def Previous(self, e):
-		total = self.TOTAL_LEN - 1;
-		self.SwitchImage(0, total, -1, 0, 2);
-
-	def First(self, e):
-		self.MoveToImage(0);
-
-	def Last(self, e):
-		self.MoveToImage(self.TOTAL_LEN - 1);
-
-	def MoveToImage(self, target):
-		total = self.TOTAL_LEN - 1
-		if (total > 0):
-			self.CUR_INDEX = target;
-			self.CACHE = [["",""],["",""],["",""]]
-			self.DisplayImageAtIndex();
-
-	def JumpToPage(self, e):
-		if self.TOTAL_LEN > 0:
-			td = wx.TextEntryDialog(self,"Enter number of page to skip to")
-			td.ShowModal();
-			val = td.GetValue()
-			if (len(val) > 0 and val.isdigit()):
-				val = int(val) - 1
-				if val >= 0 and val < self.TOTAL_LEN:
-					self.CUR_INDEX = val
-					self.DisplayImageAtIndex();
-
-	def SwitchImage(self, indexOne, indexTwo, inc, cachePrimary, cacheSecondary):
-		self.CACHE[cacheSecondary] = self.CACHE[1];
-
-		if (self.CACHE[cachePrimary] != ""):
-			self.CACHE[1] = self.CACHE[cachePrimary];
-			self.CACHE[cachePrimary] = "";
-		self.CUR_INDEX = indexTwo if self.CUR_INDEX == indexOne else self.CUR_INDEX + inc
-		if (self.CACHE[1] != ""):
-			self.DisplayImageAtIndex();
-		else:
-			self.DisplayCachedImage(1);
-
-	def IsSupportedImage(self, image):
-		for format in SUPPORTED_FORMATS:
-			if image[-len(format):] == format:
-				return True
-		return False
-
-	def IndexFilesInDirectory(self, curdir):
-		INDEXED_FILES[:] = []
-		for format in SUPPORTED_FORMATS:
-			INDEXED_FILES.extend(glob.glob(curdir + "/*" + format));
-		INDEXED_FILES.sort();
-
-	def DisplayImage(self, imageFile): 
-		if not self.IsSupportedImage(imageFile):
-			return False
-		self.IndexFilesInDirectory(dirname(realpath(imageFile)))
-		self.CUR_INDEX = 0
-		for filec in INDEXED_FILES:
-			if (filec == imageFile):
-				break;
-			self.CUR_INDEX += 1
-		self.TOTAL_LEN = len(INDEXED_FILES)
-		if self.CUR_INDEX >= self.TOTAL_LEN:
-			self.CUR_INDEX = 0
-		return self.DisplayImageAtIndex()
-
-	def DisplayImageAtIndex(self):
-		tmpIndex = INDEXED_FILES[self.CUR_INDEX]
-		self.Freeze()
-		try:
-			self.CACHE[1][0] = wx.Image(tmpIndex, wx.BITMAP_TYPE_ANY)
-			self.CACHE[1][1] = tmpIndex
-			x, y = self.CACHE[1][0].GetSize()
-			jpg1 = self.CACHE[1][0].Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap();
-			
-			self.PaintImage(jpg1)
-
-			self.Thaw()
-			return True
-		except IOError:
-			print "Image file %s not found" % tmpIndex
-			self.Thaw()
-			return False
-
-	def DisplayCachedImage(self, index):
-		if (self.TOTAL_LEN > 0):
-			tmpIndex = INDEXED_FILES[self.CUR_INDEX]
-			self.Freeze()
-			try:
-				jpg1 = self.CACHE[index][0]
-				x, y = jpg1.GetSize()
-				jpg1 = jpg1.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap();
-				
-				self.PaintImage(jpg1)
-
-				self.Thaw()
-				return True
-			except IOError:
-				print "Image file %s not found" % tmpIndex
-				self.Thaw()
-				return False
-
-	def PaintImage(self, jpg1):
-		self.statusbar.SetStatusText(str(self.CUR_INDEX + 1) + "/" + str(self.TOTAL_LEN) + " - " + self.CACHE[1][1])
-		self.spanel.FitInside();
-		self.spanel.SetScrollbars(1,1,1,1)
-		self.spanel.SetScrollRate(20,20)
-		
-		self.spanel.SetClientSize(jpg1.GetSize())
-		self.spanel.SetVirtualSize((1920, 1080))
-		self.spanel.SetVirtualSize(jpg1.GetSize())
-		self.panel.SetBitmap(jpg1);
-		self.panel.SetClientSize(jpg1.GetSize());
-		self.SetClientSize(jpg1.GetSize())
-
-		self.spanel.FitInside();
 
 	#def HideMenu(self, e):
 	#	self.HideBar(self.menubar)
@@ -362,5 +198,5 @@ class FileDrop(wx.FileDropTarget):
 	def OnDropFiles(self, x, y, filenames):
 
 		for name in filenames:
-			if (self.frame.DisplayImage(name)):
+			if (self.frame.image_manager.DisplayImage(name)):
 				return;
