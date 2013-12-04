@@ -6,6 +6,10 @@ tmpFile = expanduser("~") + "/.jpygui.ini";
 
 class Settings():
 
+	size_init = (500, 400);
+	size_min = (300, 300);
+	screen_pos = (0,0)
+
 	def __init__(self):
 		self.Config = ConfigParser.ConfigParser()
 		if isfile(tmpFile):
@@ -19,6 +23,7 @@ class Settings():
 				self.size_min = (self.Config.getint('Size', 'minwidth'), self.Config.getint('Size', 'minheight'));
 				self.size_init = (self.Config.getint('Size', 'initwidth'), self.Config.getint('Size', 'initheight'));
 			except:
+				self.defaults();
 				pass
 			try:
 				self.screen_pos = (self.Config.getint('Position', 'X'), self.Config.getint('Position', 'Y'));
