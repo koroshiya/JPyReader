@@ -1,3 +1,6 @@
+#!/usr/bin/python2.7 -tt
+
+from __future__ import unicode_literals
 import ConfigParser
 from os.path import expanduser
 from os.path import isfile
