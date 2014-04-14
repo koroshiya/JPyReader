@@ -39,6 +39,16 @@ class ImageManager():
 		if (self.frame.IsMaximized()):
 			self.frame.Maximize(False);
 			self.frame.panel.SetPosition((0,0))
+			#hug image
+			try:
+				x, y = wx.Image(INDEXED_FILES[self.CUR_INDEX], wx.BITMAP_TYPE_ANY).GetSize()
+				self.frame.SetSize(x,y)
+			except Exception, e:
+				pass
+			else:
+				pass
+			finally:
+				pass
 		else:
 			self.frame.Maximize(True);
 			self.CenterImage();
