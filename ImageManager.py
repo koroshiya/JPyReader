@@ -140,8 +140,8 @@ class ImageManager():
 			self.CACHE[1][0] = wx.Image(tmpIndex, wx.BITMAP_TYPE_ANY)
 			self.CACHE[1][1] = tmpIndex
 			x, y = self.CACHE[1][0].GetSize()
-			jpg1 = self.CACHE[1][0].Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap();
-			
+			jpg1 = self.CACHE[1][0].Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap()
+			self.frame.SetTitle("JPy-Reader - "+tmpIndex)
 			self.PaintImage(jpg1)
 
 			self.frame.Thaw()
@@ -158,8 +158,8 @@ class ImageManager():
 			try:
 				jpg1 = self.CACHE[index][0]
 				x, y = jpg1.GetSize()
-				jpg1 = jpg1.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap();
-				
+				jpg1 = jpg1.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap()
+				self.frame.SetTitle("JPy-Reader - "+tmpIndex)
 				self.PaintImage(jpg1)
 
 				self.frame.Thaw()
