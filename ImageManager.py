@@ -61,7 +61,8 @@ class ImageManager():
 	def Full(self, e):
 		if (self.frame.IsFullScreen()):
 			self.frame.ShowFullScreen(False);
-			self.frame.panel.SetPosition((0,0))
+			if (not self.frame.IsMaximized()):
+				self.frame.panel.SetPosition((0,0))
 		else:
 			self.frame.ShowFullScreen(True, style=wx.FULLSCREEN_ALL);
 			self.CenterImage();
