@@ -17,6 +17,9 @@ except ImportError:
 	print ("You can download wxpython at: http://www.wxpython.org/download.php#stable \n")
 	sys.exit()
 from threading import Thread
+import tempfile
+import zipfile
+import os
 import wx.lib.scrolledpanel as scrolled
 import Settings
 import ImageManager
@@ -112,8 +115,8 @@ class JPyGUI(wx.Frame):
 		menuSettings = wx.Menu()
 		menuHelp = wx.Menu()
 
-		self.SetMenuItem(menuFile, FILE_OPEN_DIRECTORY, '&Open\tCtrl+O', self.Import);
-		self.SetMenuItem(menuFile, FILE_OPEN_ARCHIVE, '&Open Archive\tCtrl+Z', self.Export);
+		self.SetMenuItem(menuFile, FILE_OPEN_DIRECTORY, '&Open\tCtrl+O', self.OpenFolder);
+		self.SetMenuItem(menuFile, FILE_OPEN_ARCHIVE, '&Open Archive\tCtrl+Z', self.OpenArchive);
 		menuFile.AppendSeparator()
 		self.SetMenuItem(menuFile, FILE_CLOSE, '&Quit\tCtrl+Q', self.Exit);
 
@@ -147,19 +150,38 @@ class JPyGUI(wx.Frame):
 		menu.AppendItem(mItem)
 		self.Bind(wx.EVT_MENU, event, id=idn)
 
-	def Import(self, e):
-		openFileDialog = wx.FileDialog(self, "Open Image file", "", "", "Image files (*.jpg;*.jpeg;*.png;*.gif;*.bmp)|*.jpg;*.jpeg;*.png;*.gif;*bmp", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+	def OpenArchive(self, e):
+		openFileDialog = wx.FileDialog(self, "Open Archive file", "", "", "Archives (*.zip;*.cbz)|*.zip;*.cbz", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 		
 		if (openFileDialog.ShowModal() == wx.ID_CANCEL):
 			return
-		self.DisplayImage(openFileDialog.GetPath())
+		tmpDir = tempfile.gettempdir()+"/jpyreader/"+openFileDialog.GetPath().rsplit('/',1)[1]+"/"
+		if not os.path.exists(tmpDir):
+			os.makedirs(tmpDir)
+		print tmpDir
+		self.ExtractZipFile(openFileDialog.GetPath(), tmpDir)
+		#self.DisplayImage(openFileDialog.GetPath())
 
-	def Export(self, e):
+	def OpenFolder(self, e):
 		openFileDialog = wx.DirDialog(self, "Select folder containing images to view")
 		
 		if (openFileDialog.ShowModal() == wx.ID_CANCEL):
 			return
 		self.URLList.LoadFile(openFileDialog.GetPath())
+
+	def ExtractZipFile(self, filePath, tmpDir):
+		zfile = zipfile.ZipFile(filePath, "r")
+		fileList = []
+		for name in zfile.namelist():
+			ext = os.path.splitext(name)[1].lower()
+			extensions = [".jpg", ".jpeg", ".png", ".bmp"]
+			if ext in extensions:
+				zfile.extract(name, tmpDir)
+				fileList.append(name)
+		if len(fileList) == 0:
+			print "No applicable files found"
+		else:
+			self.image_manager.DisplayImage(tmpDir+fileList[0])
 
 	def Exit(self, e):
 		self.Settings.write(self);
