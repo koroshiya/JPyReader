@@ -22,6 +22,7 @@ import zipfile
 import os
 import wx.lib.scrolledpanel as scrolled
 import Settings
+from rarfile import rarfile
 import ImageManager
 
 FILE_OPEN_DIRECTORY = 650
@@ -151,16 +152,19 @@ class JPyGUI(wx.Frame):
 		self.Bind(wx.EVT_MENU, event, id=idn)
 
 	def OpenArchive(self, e):
-		openFileDialog = wx.FileDialog(self, "Open Archive file", "", "", "Archives (*.zip;*.cbz)|*.zip;*.cbz", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+		openFileDialog = wx.FileDialog(self, "Open Archive file", "", "", "Archives (zip, cbz, rar, cbr)|*.zip;*.cbz;*.rar;*.cbr", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 		
 		if (openFileDialog.ShowModal() == wx.ID_CANCEL):
 			return
-		tmpDir = tempfile.gettempdir()+"/jpyreader/"+openFileDialog.GetPath().rsplit('/',1)[1]+"/"
+		name = openFileDialog.GetPath()
+		tmpDir = tempfile.gettempdir()+"/jpyreader/"+name.rsplit('/',1)[1]+"/"
 		if not os.path.exists(tmpDir):
 			os.makedirs(tmpDir)
 		print tmpDir
-		self.ExtractZipFile(openFileDialog.GetPath(), tmpDir)
-		#self.DisplayImage(openFileDialog.GetPath())
+		if os.path.splitext(name)[1].lower() in [".rar", ".cbr"]:
+			self.ExtractRarFile(name, tmpDir)
+		else:
+			self.ExtractZipFile(name, tmpDir)
 
 	def OpenFolder(self, e):
 		openFileDialog = wx.DirDialog(self, "Select folder containing images to view")
@@ -169,6 +173,30 @@ class JPyGUI(wx.Frame):
 			return
 		self.URLList.LoadFile(openFileDialog.GetPath())
 
+	def ExtractRarFile(self, filePath, tmpDir):
+		rf = rarfile.RarFile(filePath)
+		fileList = []
+		for f in rf.infolist():
+			name = f.filename
+			ext = os.path.splitext(name)[1].lower()
+			extensions = [".jpg", ".jpeg", ".png", ".bmp"]
+			if ext in extensions:
+				try:
+					rf.extract(name, tmpDir)
+					fileList.append(name.replace("\\", "/"))
+				except Exception, e:
+					raise
+				else:
+					pass
+				finally:
+					pass
+		rf.close()
+		if len(fileList) == 0:
+			print "No applicable files found"
+		else:
+			print "Displaying image "+tmpDir+fileList[0]
+			self.image_manager.DisplayImage(tmpDir+fileList[0])
+
 	def ExtractZipFile(self, filePath, tmpDir):
 		zfile = zipfile.ZipFile(filePath, "r")
 		fileList = []
@@ -176,8 +204,17 @@ class JPyGUI(wx.Frame):
 			ext = os.path.splitext(name)[1].lower()
 			extensions = [".jpg", ".jpeg", ".png", ".bmp"]
 			if ext in extensions:
-				zfile.extract(name, tmpDir)
-				fileList.append(name)
+				try:
+					zfile.extract(name, tmpDir)
+					fileList.append(name)
+				except Exception, e:
+					raise
+				else:
+					pass
+				finally:
+					pass
+		zfile.close()
+
 		if len(fileList) == 0:
 			print "No applicable files found"
 		else:

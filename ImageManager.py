@@ -115,6 +115,7 @@ class ImageManager():
 
 	def IndexFilesInDirectory(self, curdir):
 		INDEXED_FILES[:] = []
+		print "Indexing files in "+curdir
 		for format in SUPPORTED_FORMATS:
 			INDEXED_FILES.extend(glob.glob(curdir + "/*" + format));
 		INDEXED_FILES.sort();
