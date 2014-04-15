@@ -203,6 +203,7 @@ class JPyGUI(wx.Frame):
 		self.URLList.LoadFile(openFileDialog.GetPath())
 
 	def ExtractRarFile(self, filePath, tmpDir):
+		#needs_password()
 		if self.RarExtractMode_00.IsChecked() or self.RarExtractMode_02.IsChecked():
 			rf = rarfile.RarFile(filePath)
 			fileList = []
@@ -212,13 +213,14 @@ class JPyGUI(wx.Frame):
 				extensions = [".jpg", ".jpeg", ".png", ".bmp"]
 				if ext in extensions:
 					try:
-						rf.extract(name, tmpDir)
+						if self.RarExtractMode_00.IsChecked():
+							rf.extract(name, tmpDir)
+						else:
+							stream = cStringIO.StringIO(rf.read(name))
+							tmpFile = wx.ImageFromStream(stream)
+							self.rar[1].append(tmpFile)
 						name = name.replace("\\", "/")
 						fileList.append(name)
-						if self.RarExtractMode_02.IsChecked():
-							tmpFile = wx.Image(tmpDir + name, wx.BITMAP_TYPE_ANY)
-							self.rar[1].append(tmpFile)
-							os.remove(tmpDir + name)
 					except rarfile.RarCRCError, rc:
 						print "Archive is password-protected or corrupt"
 					except rarfile.RarExecError, re:
