@@ -63,8 +63,8 @@ class JPyGUI(wx.Frame):
 		self.image_manager = ImageManager.ImageManager()
 		self.image_manager.SetFrame(self)
 
-		self.rar = (0, "")
-		self.zip = (0, "")
+		self.rar = [0, []]
+		self.zip = [0, []]
 
 		dt = FileDrop(self)
 		dt.SetFrame(self)
@@ -202,7 +202,7 @@ class JPyGUI(wx.Frame):
 		self.URLList.LoadFile(openFileDialog.GetPath())
 
 	def ExtractRarFile(self, filePath, tmpDir):
-		if self.RarExtractMode_00.IsChecked():
+		if self.RarExtractMode_00.IsChecked() or self.RarExtractMode_02.IsChecked():
 			rf = rarfile.RarFile(filePath)
 			fileList = []
 			for f in rf.infolist():
@@ -212,7 +212,17 @@ class JPyGUI(wx.Frame):
 				if ext in extensions:
 					try:
 						rf.extract(name, tmpDir)
-						fileList.append(name.replace("\\", "/"))
+						name = name.replace("\\", "/")
+						fileList.append(name)
+						if self.RarExtractMode_02.IsChecked():
+							tmpFile = wx.Image(tmpDir + name, wx.BITMAP_TYPE_ANY)
+							self.rar[1].append(tmpFile)
+							os.remove(tmpDir + name)
+					except rarfile.RarCRCError, rc:
+						print "Archive is password-protected or corrupt"
+					except rarfile.RarExecError, re:
+						raise
+						print "unrar does not appear to be installed"
 					except Exception, e:
 						raise
 					else:
@@ -224,11 +234,15 @@ class JPyGUI(wx.Frame):
 				print "No applicable files found"
 			else:
 				print "Displaying image "+tmpDir+fileList[0]
-				self.image_manager.DisplayImage(tmpDir+fileList[0])
+				if self.RarExtractMode_00.IsChecked():
+					self.image_manager.DisplayImage(tmpDir+fileList[0])
+				else:
+					self.rar[0] = 2
+					self.image_manager.InitRAMImage()
 		elif self.RarExtractMode_01.IsChecked(): #Read directly
 			#self.rar = (1, rarfile.RarFile(filePath))
 			pass
-		else: #load into ram
+		else:
 			pass
 
 	def ExtractZipFile(self, filePath, tmpDir):
@@ -262,10 +276,10 @@ class JPyGUI(wx.Frame):
 
 	def CloseArchives(self):
 		for tp in (self.zip, self.rar):
-			index, zf = tp
-			if index == 1:
+			if tp[0] == 1:
 				zf.close()
-			tp = (0, "")
+			tp[0] = 0
+			tp[1] = []
 
 	def Exit(self, e):
 		self.CloseArchives()

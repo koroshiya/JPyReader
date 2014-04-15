@@ -106,17 +106,23 @@ class ImageManager():
 
 	def SwitchImage(self, boolForward):
 		total = self.TOTAL_LEN;
-		indexOne, indexTwo, inc, cachePrimary, cacheSecondary = (total, 0, 1, 2, 0) if boolForward else (0, total, -1, 0, 2)
-		self.CACHE[cacheSecondary] = self.CACHE[1];
 
-		if (self.CACHE[cachePrimary] != ""):
-			self.CACHE[1] = self.CACHE[cachePrimary];
-			self.CACHE[cachePrimary] = "";
-		self.CUR_INDEX = indexTwo if self.CUR_INDEX == indexOne else self.CUR_INDEX + inc
-		if (self.CACHE[1] != ""):
-			self.DisplayImageAtIndex();
+		if self.IsArchiveInUse():
+			indexOne, indexTwo, inc = (total, 0, 1) if boolForward else (0, total, -1)
+			self.CUR_INDEX = indexTwo if self.CUR_INDEX == indexOne else self.CUR_INDEX + inc
+			self.DisplayRAMImage(self.CUR_INDEX)
 		else:
-			self.DisplayCachedImage(1);
+			indexOne, indexTwo, inc, cachePrimary, cacheSecondary = (total, 0, 1, 2, 0) if boolForward else (0, total, -1, 0, 2)
+			self.CACHE[cacheSecondary] = self.CACHE[1];
+
+			if (self.CACHE[cachePrimary] != ""):
+				self.CACHE[1] = self.CACHE[cachePrimary];
+				self.CACHE[cachePrimary] = "";
+			self.CUR_INDEX = indexTwo if self.CUR_INDEX == indexOne else self.CUR_INDEX + inc
+			if (self.CACHE[1] != ""):
+				self.DisplayImageAtIndex();
+			else:
+				self.DisplayCachedImage(1);
 
 	def IsSupportedImage(self, image):
 		for format in SUPPORTED_FORMATS:
@@ -130,6 +136,32 @@ class ImageManager():
 		for format in SUPPORTED_FORMATS:
 			INDEXED_FILES.extend(glob.glob(curdir + "/*" + format));
 		INDEXED_FILES.sort();
+
+	def DisplayRAMImage(self, findex=0):
+		if self.frame.rar[0] == 2:
+			self.frame.Freeze()
+			print "Index:", str(findex)
+			tmpFile = self.frame.rar[1][findex]
+			x, y = tmpFile.GetSize()
+			jpg1 = tmpFile.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap()
+			self.frame.SetTitle("JPy-Reader - Page "+str(findex))
+			self.PaintImage(jpg1)
+			self.frame.Thaw()
+		else:
+			#self.TOTAL_LEN = len(self.frame.zip[1]) - 1
+			print "Zip not implemented"
+
+	def InitRAMImage(self):
+		self.CUR_INDEX = 0
+		if self.frame.rar[0] == 2:
+			self.TOTAL_LEN = len(self.frame.rar[1]) - 1
+			print "Total:", self.TOTAL_LEN
+		else:
+			pass #Zip
+		self.DisplayRAMImage(0)
+
+	def IsArchiveInUse(self):
+		return self.frame.rar[0] != 0 or self.frame.zip[0] != 0
 
 	def DisplayImage(self, imageFile): 
 		if not self.IsSupportedImage(imageFile):
