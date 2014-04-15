@@ -250,6 +250,7 @@ class ImageManager():
 				return False
 
 	def PaintImage(self, jpg1):
+		self.frame.SetMaxSize(self.frame.sizes[self.frame.GetMonitor()])
 		self.frame.statusbar.SetStatusText(str(self.CUR_INDEX + 1) + "/" + str(self.TOTAL_LEN + 1) + " - " + self.CACHE[1][1])
 		self.frame.spanel.FitInside();
 		self.frame.spanel.SetScrollbars(1,1,1,1)
