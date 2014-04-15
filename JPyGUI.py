@@ -359,6 +359,9 @@ class JPyGUI(wx.Frame):
 		info.SetCopyright("(C) 2013 Koroshiya")
 		wx.AboutBox(info)
 
+	def DisplayImage(self, name):
+		self.image_manager.DisplayImage(name)
+
 class FileDrop(wx.FileDropTarget):
 	def __init__(self, window):
 		wx.FileDropTarget.__init__(self)
@@ -370,5 +373,5 @@ class FileDrop(wx.FileDropTarget):
 	def OnDropFiles(self, x, y, filenames):
 
 		for name in filenames:
-			if (self.frame.image_manager.DisplayImage(name)):
+			if (self.frame.DisplayImage(name)): #TODO: fix image position on start max/full
 				return;
