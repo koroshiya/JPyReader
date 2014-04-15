@@ -45,6 +45,11 @@ CMD_ZIP_EXTRACT = 811
 CMD_ZIP_READ = 812
 CMD_ZIP_RAM = 813
 
+CMD_RAR = 820
+CMD_RAR_EXTRACT = 821
+CMD_RAR_READ = 822
+CMD_RAR_RAM = 823
+
 HELP_ABOUT = 900
 
 class JPyGUI(wx.Frame):
@@ -139,11 +144,17 @@ class JPyGUI(wx.Frame):
 		self.SetMenuItem(menuCommands, CMD_JUMP, '&Jump to page...\tCtrl+J', self.image_manager.JumpToPage)
 
 		zipMenu = wx.Menu()
-		zipExtract = zipMenu.Append(CMD_ZIP_EXTRACT, '&Extract', kind=wx.ITEM_RADIO) #self.image_manager.SetZipMode(0)
-		zipMenu.Append(CMD_ZIP_READ, '&Read from ZIP', kind=wx.ITEM_RADIO)
-		zipMenu.Append(CMD_ZIP_RAM, '&Load into RAM', kind=wx.ITEM_RADIO)
+		self.ZipExtractMode_00 = zipMenu.Append(CMD_ZIP_EXTRACT, '&Extract to temp', kind=wx.ITEM_RADIO) #self.image_manager.SetZipMode(0)
+		self.ZipExtractMode_01 = zipMenu.Append(CMD_ZIP_READ, '&Read directly from ZIP', kind=wx.ITEM_RADIO)
+		self.ZipExtractMode_02 = zipMenu.Append(CMD_ZIP_RAM, '&Load into RAM', kind=wx.ITEM_RADIO)
 		menuSettings.AppendMenu(CMD_ZIP, "ZIP Files", zipMenu)
 		#TODO: setting for zip mode, load on start, save on exit
+
+		rarMenu = wx.Menu()
+		self.RarExtractMode_00 = rarMenu.Append(CMD_RAR_EXTRACT, '&Extract to temp', kind=wx.ITEM_RADIO) #self.image_manager.SetZipMode(0)
+		self.RarExtractMode_01 = rarMenu.Append(CMD_RAR_READ, '&Read directly from RAR', kind=wx.ITEM_RADIO)
+		self.RarExtractMode_02 = rarMenu.Append(CMD_RAR_RAM, '&Load into RAM', kind=wx.ITEM_RADIO)
+		menuSettings.AppendMenu(CMD_RAR, "RAR Files", rarMenu)
 
 		self.SetMenuItem(menuHelp, HELP_ABOUT, '&About', self.About);
 
@@ -186,51 +197,53 @@ class JPyGUI(wx.Frame):
 		self.URLList.LoadFile(openFileDialog.GetPath())
 
 	def ExtractRarFile(self, filePath, tmpDir):
-		rf = rarfile.RarFile(filePath)
-		fileList = []
-		for f in rf.infolist():
-			name = f.filename
-			ext = os.path.splitext(name)[1].lower()
-			extensions = [".jpg", ".jpeg", ".png", ".bmp"]
-			if ext in extensions:
-				try:
-					rf.extract(name, tmpDir)
-					fileList.append(name.replace("\\", "/"))
-				except Exception, e:
-					raise
-				else:
-					pass
-				finally:
-					pass
-		rf.close()
-		if len(fileList) == 0:
-			print "No applicable files found"
-		else:
-			print "Displaying image "+tmpDir+fileList[0]
-			self.image_manager.DisplayImage(tmpDir+fileList[0])
+		if self.RarExtractMode_00.IsChecked():
+			rf = rarfile.RarFile(filePath)
+			fileList = []
+			for f in rf.infolist():
+				name = f.filename
+				ext = os.path.splitext(name)[1].lower()
+				extensions = [".jpg", ".jpeg", ".png", ".bmp"]
+				if ext in extensions:
+					try:
+						rf.extract(name, tmpDir)
+						fileList.append(name.replace("\\", "/"))
+					except Exception, e:
+						raise
+					else:
+						pass
+					finally:
+						pass
+			rf.close()
+			if len(fileList) == 0:
+				print "No applicable files found"
+			else:
+				print "Displaying image "+tmpDir+fileList[0]
+				self.image_manager.DisplayImage(tmpDir+fileList[0])
 
 	def ExtractZipFile(self, filePath, tmpDir):
-		zfile = zipfile.ZipFile(filePath, "r")
-		fileList = []
-		for name in zfile.namelist():
-			ext = os.path.splitext(name)[1].lower()
-			extensions = [".jpg", ".jpeg", ".png", ".bmp"]
-			if ext in extensions:
-				try:
-					zfile.extract(name, tmpDir)
-					fileList.append(name)
-				except Exception, e:
-					raise
-				else:
-					pass
-				finally:
-					pass
-		zfile.close()
+		if self.ZipExtractMode_00.IsChecked():
+			zfile = zipfile.ZipFile(filePath, "r")
+			fileList = []
+			for name in zfile.namelist():
+				ext = os.path.splitext(name)[1].lower()
+				extensions = [".jpg", ".jpeg", ".png", ".bmp"]
+				if ext in extensions:
+					try:
+						zfile.extract(name, tmpDir)
+						fileList.append(name)
+					except Exception, e:
+						raise
+					else:
+						pass
+					finally:
+						pass
+			zfile.close()
 
-		if len(fileList) == 0:
-			print "No applicable files found"
-		else:
-			self.image_manager.DisplayImage(tmpDir+fileList[0])
+			if len(fileList) == 0:
+				print "No applicable files found"
+			else:
+				self.image_manager.DisplayImage(tmpDir+fileList[0])
 
 	def Exit(self, e):
 		self.Settings.write(self);
