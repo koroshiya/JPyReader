@@ -20,7 +20,7 @@ from threading import Thread
 import tempfile
 import zipfile
 import os
-from StringIO import StringIO
+import cStringIO
 import wx.lib.scrolledpanel as scrolled
 import Settings
 from rarfile import rarfile
@@ -256,12 +256,13 @@ class JPyGUI(wx.Frame):
 				extensions = [".jpg", ".jpeg", ".png", ".bmp"]
 				if ext in extensions:
 					try:
-						zfile.extract(name, tmpDir)
 						fileList.append(name)
 						if self.ZipExtractMode_02.IsChecked():
-							tmpFile = wx.Image(tmpDir + name, wx.BITMAP_TYPE_ANY)
+							stream = cStringIO.StringIO(zfile.read(name))
+							tmpFile = wx.ImageFromStream(stream)
 							self.zip[1].append(tmpFile)
-							os.remove(tmpDir + name)
+						else:
+							zfile.extract(name, tmpDir)
 					except Exception, e:
 						raise
 					else:
