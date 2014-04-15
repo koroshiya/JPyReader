@@ -125,8 +125,16 @@ class JPyGUI(wx.Frame):
 		self.Bind(wx.EVT_MOUSEWHEEL, self.Print)
 		self.panel.Bind(wx.EVT_MOUSEWHEEL, self.Print)
 		self.spanel.Bind(wx.EVT_MOUSEWHEEL, self.Print)
+		self.spanel.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+		self.spanel.SetFocus()
 
 		self.Show(True)
+
+	def OnKeyDown(self, e):
+		key = e.GetKeyCode()
+        
+		if key == wx.WXK_ESCAPE:
+			self.Exit(e)
 
 	def Print(self, e):
 		if e.ControlDown():
