@@ -40,6 +40,11 @@ CMD_FIRST = 803
 CMD_LAST = 804
 CMD_JUMP = 805
 
+CMD_ZIP = 810
+CMD_ZIP_EXTRACT = 811
+CMD_ZIP_READ = 812
+CMD_ZIP_RAM = 813
+
 HELP_ABOUT = 900
 
 class JPyGUI(wx.Frame):
@@ -132,6 +137,13 @@ class JPyGUI(wx.Frame):
 		self.SetMenuItem(menuCommands, CMD_LAST, '&Last\tCtrl+Shift+RIGHT', self.image_manager.Last);
 		menuCommands.AppendSeparator();
 		self.SetMenuItem(menuCommands, CMD_JUMP, '&Jump to page...\tCtrl+J', self.image_manager.JumpToPage)
+
+		zipMenu = wx.Menu()
+		zipExtract = zipMenu.Append(CMD_ZIP_EXTRACT, '&Extract', kind=wx.ITEM_RADIO) #self.image_manager.SetZipMode(0)
+		zipMenu.Append(CMD_ZIP_READ, '&Read from ZIP', kind=wx.ITEM_RADIO)
+		zipMenu.Append(CMD_ZIP_RAM, '&Load into RAM', kind=wx.ITEM_RADIO)
+		menuSettings.AppendMenu(CMD_ZIP, "ZIP Files", zipMenu)
+		#TODO: setting for zip mode, load on start, save on exit
 
 		self.SetMenuItem(menuHelp, HELP_ABOUT, '&About', self.About);
 
