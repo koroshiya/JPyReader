@@ -66,6 +66,7 @@ class JPyGUI(wx.Frame):
 
 		self.rar = [0, [], []]
 		self.zip = [0, [], []]
+		self.SUPPORTED_FORMATS = [".png", ".jpg", ".jpeg", ".gif", ".bmp"]
 
 		dt = FileDrop(self)
 		dt.SetFrame(self)
@@ -209,8 +210,7 @@ class JPyGUI(wx.Frame):
 			for f in rf.infolist():
 				name = f.filename
 				ext = os.path.splitext(name)[1].lower()
-				extensions = [".jpg", ".jpeg", ".png", ".bmp"]
-				if ext in extensions:
+				if ext in self.SUPPORTED_FORMATS:
 					try:
 						if self.RarExtractMode_00.IsChecked():
 							rf.extract(name, tmpDir)
@@ -253,8 +253,7 @@ class JPyGUI(wx.Frame):
 			zfile = zipfile.ZipFile(filePath, "r")
 			for name in zfile.namelist():
 				ext = os.path.splitext(name)[1].lower()
-				extensions = [".jpg", ".jpeg", ".png", ".bmp"]
-				if ext in extensions:
+				if ext in self.SUPPORTED_FORMATS:
 					try:
 						self.zip[2].append(name)
 						if self.ZipExtractMode_02.IsChecked():

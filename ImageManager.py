@@ -21,7 +21,6 @@ from os.path import dirname
 from os.path import realpath
 import glob
 
-SUPPORTED_FORMATS = [".png", ".jpg", ".jpeg", ".gif", ".bmp"]
 INDEXED_FILES = []
 
 class ImageManager():
@@ -125,7 +124,7 @@ class ImageManager():
 				self.DisplayCachedImage(1);
 
 	def IsSupportedImage(self, image):
-		for format in SUPPORTED_FORMATS:
+		for format in self.frame.SUPPORTED_FORMATS:
 			if image[-len(format):] == format:
 				return True
 		return False
@@ -133,7 +132,7 @@ class ImageManager():
 	def IndexFilesInDirectory(self, curdir):
 		INDEXED_FILES[:] = []
 		print "Indexing files in "+curdir
-		for format in SUPPORTED_FORMATS:
+		for format in self.frame.SUPPORTED_FORMATS:
 			INDEXED_FILES.extend(glob.glob(curdir + "/*" + format));
 		INDEXED_FILES.sort();
 
@@ -150,7 +149,7 @@ class ImageManager():
 		jpg1 = tmpFile.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap()
 		self.frame.SetTitle("JPy-Reader - Page "+str(self.CUR_INDEX+1)+" of "+str(self.TOTAL_LEN+1)+" - "+target[2][findex])
 		self.PaintImage(jpg1)
-		
+
 		self.frame.Thaw()
 
 	def InitRAMImage(self):
