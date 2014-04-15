@@ -60,8 +60,11 @@ class JPyGUI(wx.Frame):
 		self.SetDoubleBuffered(True)
 		self.displays = (wx.Display(i) for i in range(wx.Display.GetCount()))
 		self.sizes = [display.GetGeometry().GetSize() for display in self.displays]
-		self.image_manager = ImageManager.ImageManager();
-		self.image_manager.SetFrame(self);
+		self.image_manager = ImageManager.ImageManager()
+		self.image_manager.SetFrame(self)
+
+		self.rar = (0, "")
+		self.zip = (0, "")
 
 		dt = FileDrop(self)
 		dt.SetFrame(self)
@@ -184,6 +187,8 @@ class JPyGUI(wx.Frame):
 		if not os.path.exists(tmpDir):
 			os.makedirs(tmpDir)
 		print tmpDir
+
+		self.CloseArchives()
 		if os.path.splitext(name)[1].lower() in [".rar", ".cbr"]:
 			self.ExtractRarFile(name, tmpDir)
 		else:
@@ -220,6 +225,11 @@ class JPyGUI(wx.Frame):
 			else:
 				print "Displaying image "+tmpDir+fileList[0]
 				self.image_manager.DisplayImage(tmpDir+fileList[0])
+		elif self.RarExtractMode_01.IsChecked(): #Read directly
+			#self.rar = (1, rarfile.RarFile(filePath))
+			pass
+		else: #load into ram
+			pass
 
 	def ExtractZipFile(self, filePath, tmpDir):
 		if self.ZipExtractMode_00.IsChecked():
@@ -244,8 +254,21 @@ class JPyGUI(wx.Frame):
 				print "No applicable files found"
 			else:
 				self.image_manager.DisplayImage(tmpDir+fileList[0])
+		elif self.ZipExtractMode_01.IsChecked(): #Read directly
+			#self.zip = (1, zipfile.ZipFile(filePath, "r"))
+			pass
+		else: #load into ram
+			pass
+
+	def CloseArchives(self):
+		for tp in (self.zip, self.rar):
+			index, zf = tp
+			if index == 1:
+				zf.close()
+			tp = (0, "")
 
 	def Exit(self, e):
+		self.CloseArchives()
 		self.Settings.write(self);
 		wx.Exit()
 
