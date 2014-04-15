@@ -139,16 +139,18 @@ class ImageManager():
 
 	def DisplayRAMImage(self, findex=0):
 		if self.frame.rar[0] == 2:
-			target = self.frame.rar[1]
+			target = self.frame.rar
 		else:
-			target = self.frame.zip[1]
+			target = self.frame.zip
+
 		self.frame.Freeze()
-		print "Index:", str(findex)
-		tmpFile = target[findex]
+		
+		tmpFile = target[1][findex]
 		x, y = tmpFile.GetSize()
 		jpg1 = tmpFile.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap()
-		self.frame.SetTitle("JPy-Reader - Page "+str(findex))
+		self.frame.SetTitle("JPy-Reader - Page "+str(self.CUR_INDEX+1)+" of "+str(self.TOTAL_LEN+1)+" - "+target[2][findex])
 		self.PaintImage(jpg1)
+		
 		self.frame.Thaw()
 
 	def InitRAMImage(self):

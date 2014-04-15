@@ -64,8 +64,8 @@ class JPyGUI(wx.Frame):
 		self.image_manager = ImageManager.ImageManager()
 		self.image_manager.SetFrame(self)
 
-		self.rar = [0, []]
-		self.zip = [0, []]
+		self.rar = [0, [], []]
+		self.zip = [0, [], []]
 
 		dt = FileDrop(self)
 		dt.SetFrame(self)
@@ -206,7 +206,6 @@ class JPyGUI(wx.Frame):
 		#needs_password()
 		if self.RarExtractMode_00.IsChecked() or self.RarExtractMode_02.IsChecked():
 			rf = rarfile.RarFile(filePath)
-			fileList = []
 			for f in rf.infolist():
 				name = f.filename
 				ext = os.path.splitext(name)[1].lower()
@@ -220,7 +219,7 @@ class JPyGUI(wx.Frame):
 							tmpFile = wx.ImageFromStream(stream)
 							self.rar[1].append(tmpFile)
 						name = name.replace("\\", "/")
-						fileList.append(name)
+						self.rar[2].append(name)
 					except rarfile.RarCRCError, rc:
 						print "Archive is password-protected or corrupt"
 					except rarfile.RarExecError, re:
@@ -233,12 +232,12 @@ class JPyGUI(wx.Frame):
 					finally:
 						pass
 			rf.close()
-			if len(fileList) == 0:
+			if len(self.rar[2]) == 0:
 				print "No applicable files found"
 			else:
-				print "Displaying image "+tmpDir+fileList[0]
+				print "Displaying image "+tmpDir+self.rar[2][0]
 				if self.RarExtractMode_00.IsChecked():
-					self.image_manager.DisplayImage(tmpDir+fileList[0])
+					self.image_manager.DisplayImage(tmpDir+self.rar[2][0])
 				else:
 					self.rar[0] = 2
 					self.image_manager.InitRAMImage()
@@ -252,13 +251,12 @@ class JPyGUI(wx.Frame):
 	def ExtractZipFile(self, filePath, tmpDir):
 		if self.ZipExtractMode_00.IsChecked() or self.ZipExtractMode_02.IsChecked():
 			zfile = zipfile.ZipFile(filePath, "r")
-			fileList = []
 			for name in zfile.namelist():
 				ext = os.path.splitext(name)[1].lower()
 				extensions = [".jpg", ".jpeg", ".png", ".bmp"]
 				if ext in extensions:
 					try:
-						fileList.append(name)
+						self.zip[2].append(name)
 						if self.ZipExtractMode_02.IsChecked():
 							stream = cStringIO.StringIO(zfile.read(name))
 							tmpFile = wx.ImageFromStream(stream)
@@ -273,11 +271,11 @@ class JPyGUI(wx.Frame):
 						pass
 			zfile.close()
 
-			if len(fileList) == 0:
+			if len(self.zip[2]) == 0:
 				print "No applicable files found"
 			else:
 				if self.ZipExtractMode_00.IsChecked():
-					self.image_manager.DisplayImage(tmpDir+fileList[0])
+					self.image_manager.DisplayImage(tmpDir+self.zip[2][0])
 				else:
 					self.zip[0] = 2
 					self.image_manager.InitRAMImage()
@@ -295,6 +293,7 @@ class JPyGUI(wx.Frame):
 				zf.close()
 			tp[0] = 0
 			tp[1] = []
+			tp[2] = []
 
 	def Exit(self, e):
 		self.CloseArchives()
