@@ -242,12 +242,17 @@ class JPyGUI(wx.Frame):
 					self.rar[0] = 2
 					self.image_manager.InitRAMImage()
 		elif self.RarExtractMode_01.IsChecked(): #Read directly
-			#self.rar = (1, rarfile.RarFile(filePath))
-			#self.rar = [1, cStringIO.StringIO(), []]
-			#self.rar[1].write(rarfile.RarFile(filePath))
-			pass
+			rf = rarfile.RarFile(filePath)
+			self.rar[0] = 1
+			self.rar[1] = filePath
+			for f in rf.infolist():
+				name = f.filename
+				ext = os.path.splitext(name)[1].lower()
+				if ext in self.SUPPORTED_FORMATS:
+					self.rar[2].append(name)
+			self.image_manager.InitHeldImage()
 		else:
-			pass
+			print "Rar extraction mode not set"
 
 	def ExtractZipFile(self, filePath, tmpDir):
 		if self.ZipExtractMode_00.IsChecked() or self.ZipExtractMode_02.IsChecked():
@@ -279,18 +284,31 @@ class JPyGUI(wx.Frame):
 				else:
 					self.zip[0] = 2
 					self.image_manager.InitRAMImage()
-		elif self.ZipExtractMode_01.IsChecked(): #Read directly
-			#self.zip = (1, zipfile.ZipFile(filePath, "r"))
-			#self.zip = (1, StringIO())
-			#self.zip[1].write(zipfile.ZipFile(filePath, "r"))
-			pass
+		elif self.ZipExtractMode_01.IsChecked():
+			rf = zipfile.ZipFile(filePath)
+			self.zip[0] = 1
+			self.zip[1] = filePath
+			for name in rf.namelist():
+				ext = os.path.splitext(name)[1].lower()
+				if ext in self.SUPPORTED_FORMATS:
+					self.zip[2].append(name)
+			self.image_manager.InitHeldImage()
 		else:
-			pass
+			print "Zip extraction mode not set"
 
 	def CloseArchives(self):
 		for tp in (self.zip, self.rar):
 			if tp[0] == 1:
-				tp[1].close()
+				try:
+					tp[1].close()
+				except AttributeError, ae:
+					pass
+				except Exception, e:
+					raise
+				else:
+					pass
+				finally:
+					pass
 			tp[0] = 0
 			tp[1] = []
 			tp[2] = []

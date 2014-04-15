@@ -19,6 +19,9 @@ except ImportError:
 
 from os.path import dirname
 from os.path import realpath
+from rarfile import rarfile
+import zipfile
+import cStringIO
 import glob
 
 INDEXED_FILES = []
@@ -106,10 +109,13 @@ class ImageManager():
 	def SwitchImage(self, boolForward):
 		total = self.TOTAL_LEN;
 
-		if self.IsArchiveInUse():
+		if self.IsArchiveInUse() or self.IsArchiveHeld():
 			indexOne, indexTwo, inc = (total, 0, 1) if boolForward else (0, total, -1)
 			self.CUR_INDEX = indexTwo if self.CUR_INDEX == indexOne else self.CUR_INDEX + inc
-			self.DisplayRAMImage(self.CUR_INDEX)
+			if self.IsArchiveHeld():
+				self.DisplayHeldImage(self.CUR_INDEX)
+			else:
+				self.DisplayRAMImage(self.CUR_INDEX)
 		else:
 			indexOne, indexTwo, inc, cachePrimary, cacheSecondary = (total, 0, 1, 2, 0) if boolForward else (0, total, -1, 0, 2)
 			self.CACHE[cacheSecondary] = self.CACHE[1];
@@ -136,6 +142,28 @@ class ImageManager():
 			INDEXED_FILES.extend(glob.glob(curdir + "/*" + format));
 		INDEXED_FILES.sort();
 
+	def DisplayHeldImage(self, findex=0):
+		if self.frame.rar[0] == 1:
+			target = self.frame.rar
+			name = target[2][findex]
+			stream = cStringIO.StringIO(rarfile.RarFile(self.frame.rar[1]).read(name))
+		else:
+			target = self.frame.zip
+			name = target[2][findex]
+			stream = cStringIO.StringIO(zipfile.ZipFile(self.frame.zip[1], 'r').read(name))
+
+		#stream = cStringIO.StringIO(target.read(name))
+		tmpFile = wx.ImageFromStream(stream)
+
+		self.frame.Freeze()
+		
+		x, y = tmpFile.GetSize()
+		jpg1 = tmpFile.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap()
+		self.frame.SetTitle("JPy-Reader - Page "+str(self.CUR_INDEX+1)+" of "+str(self.TOTAL_LEN+1)+" - "+target[2][findex])
+		self.PaintImage(jpg1)
+
+		self.frame.Thaw()
+
 	def DisplayRAMImage(self, findex=0):
 		if self.frame.rar[0] == 2:
 			target = self.frame.rar
@@ -153,13 +181,23 @@ class ImageManager():
 		self.frame.Thaw()
 
 	def InitRAMImage(self):
-		self.CUR_INDEX = 0
-		self.TOTAL_LEN = len(self.frame.rar[1]) - 1 if self.frame.rar[0] == 2 else len(self.frame.zip[1]) - 1
-		print "Total:", self.TOTAL_LEN
+		self.InitIndex(2)
 		self.DisplayRAMImage(0)
 
+	def InitHeldImage(self):
+		self.InitIndex(1)
+		self.DisplayHeldImage(0)
+
+	def InitIndex(self, index):
+		self.CUR_INDEX = 0
+		self.TOTAL_LEN = len(self.frame.rar[2]) - 1 if self.frame.rar[0] == index else len(self.frame.zip[2]) - 1
+		print "Total:", self.TOTAL_LEN
+
 	def IsArchiveInUse(self):
-		return self.frame.rar[0] != 0 or self.frame.zip[0] != 0
+		return self.frame.rar[0] == 2 or self.frame.zip[0] == 2
+
+	def IsArchiveHeld(self):
+		return self.frame.rar[0] == 1 or self.frame.zip[0] == 1
 
 	def DisplayImage(self, imageFile): 
 		if not self.IsSupportedImage(imageFile):
