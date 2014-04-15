@@ -243,7 +243,8 @@ class JPyGUI(wx.Frame):
 					self.image_manager.InitRAMImage()
 		elif self.RarExtractMode_01.IsChecked(): #Read directly
 			#self.rar = (1, rarfile.RarFile(filePath))
-			#self.rar = (1, StringIO())
+			#self.rar = [1, cStringIO.StringIO(), []]
+			#self.rar[1].write(rarfile.RarFile(filePath))
 			pass
 		else:
 			pass
@@ -289,7 +290,7 @@ class JPyGUI(wx.Frame):
 	def CloseArchives(self):
 		for tp in (self.zip, self.rar):
 			if tp[0] == 1:
-				zf.close()
+				tp[1].close()
 			tp[0] = 0
 			tp[1] = []
 			tp[2] = []
