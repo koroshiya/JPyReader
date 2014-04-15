@@ -139,25 +139,22 @@ class ImageManager():
 
 	def DisplayRAMImage(self, findex=0):
 		if self.frame.rar[0] == 2:
-			self.frame.Freeze()
-			print "Index:", str(findex)
-			tmpFile = self.frame.rar[1][findex]
-			x, y = tmpFile.GetSize()
-			jpg1 = tmpFile.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap()
-			self.frame.SetTitle("JPy-Reader - Page "+str(findex))
-			self.PaintImage(jpg1)
-			self.frame.Thaw()
+			target = self.frame.rar[1]
 		else:
-			#self.TOTAL_LEN = len(self.frame.zip[1]) - 1
-			print "Zip not implemented"
+			target = self.frame.zip[1]
+		self.frame.Freeze()
+		print "Index:", str(findex)
+		tmpFile = target[findex]
+		x, y = tmpFile.GetSize()
+		jpg1 = tmpFile.Scale(x * self.SCALE, y * self.SCALE).ConvertToBitmap()
+		self.frame.SetTitle("JPy-Reader - Page "+str(findex))
+		self.PaintImage(jpg1)
+		self.frame.Thaw()
 
 	def InitRAMImage(self):
 		self.CUR_INDEX = 0
-		if self.frame.rar[0] == 2:
-			self.TOTAL_LEN = len(self.frame.rar[1]) - 1
-			print "Total:", self.TOTAL_LEN
-		else:
-			pass #Zip
+		self.TOTAL_LEN = len(self.frame.rar[1]) - 1 if self.frame.rar[0] == 2 else len(self.frame.zip[1]) - 1
+		print "Total:", self.TOTAL_LEN
 		self.DisplayRAMImage(0)
 
 	def IsArchiveInUse(self):

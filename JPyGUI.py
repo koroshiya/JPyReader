@@ -20,6 +20,7 @@ from threading import Thread
 import tempfile
 import zipfile
 import os
+from StringIO import StringIO
 import wx.lib.scrolledpanel as scrolled
 import Settings
 from rarfile import rarfile
@@ -241,12 +242,13 @@ class JPyGUI(wx.Frame):
 					self.image_manager.InitRAMImage()
 		elif self.RarExtractMode_01.IsChecked(): #Read directly
 			#self.rar = (1, rarfile.RarFile(filePath))
+			#self.rar = (1, StringIO())
 			pass
 		else:
 			pass
 
 	def ExtractZipFile(self, filePath, tmpDir):
-		if self.ZipExtractMode_00.IsChecked():
+		if self.ZipExtractMode_00.IsChecked() or self.ZipExtractMode_02.IsChecked():
 			zfile = zipfile.ZipFile(filePath, "r")
 			fileList = []
 			for name in zfile.namelist():
@@ -256,6 +258,10 @@ class JPyGUI(wx.Frame):
 					try:
 						zfile.extract(name, tmpDir)
 						fileList.append(name)
+						if self.ZipExtractMode_02.IsChecked():
+							tmpFile = wx.Image(tmpDir + name, wx.BITMAP_TYPE_ANY)
+							self.zip[1].append(tmpFile)
+							os.remove(tmpDir + name)
 					except Exception, e:
 						raise
 					else:
@@ -267,11 +273,17 @@ class JPyGUI(wx.Frame):
 			if len(fileList) == 0:
 				print "No applicable files found"
 			else:
-				self.image_manager.DisplayImage(tmpDir+fileList[0])
+				if self.ZipExtractMode_00.IsChecked():
+					self.image_manager.DisplayImage(tmpDir+fileList[0])
+				else:
+					self.zip[0] = 2
+					self.image_manager.InitRAMImage()
 		elif self.ZipExtractMode_01.IsChecked(): #Read directly
 			#self.zip = (1, zipfile.ZipFile(filePath, "r"))
+			#self.zip = (1, StringIO())
+			#self.zip[1].write(zipfile.ZipFile(filePath, "r"))
 			pass
-		else: #load into ram
+		else:
 			pass
 
 	def CloseArchives(self):
