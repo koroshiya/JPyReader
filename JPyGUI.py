@@ -76,7 +76,11 @@ class JPyGUI(wx.Frame):
 
 		self.SetBackgroundColour(wx.BLACK)
 		self.SetTitle("JPy-Reader")
-		self.SetIcon(wx.Icon('jr.png', wx.BITMAP_TYPE_PNG))
+		try:
+			os.chdir(os.path.dirname(__file__))
+			self.SetIcon(wx.Icon('jr.png', wx.BITMAP_TYPE_PNG))
+		except:
+			pass
 		self.Settings = Settings.Settings()
 		self.SetSize(self.Settings.size_init)
 		self.SetMinSize(self.Settings.size_min)
@@ -373,5 +377,6 @@ class FileDrop(wx.FileDropTarget):
 	def OnDropFiles(self, x, y, filenames):
 
 		for name in filenames:
+			print name
 			if (self.frame.DisplayImage(name)): #TODO: fix image position on start max/full
-				return;
+				return; #TODO: fix max image height when not full/max
