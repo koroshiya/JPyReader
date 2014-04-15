@@ -12,6 +12,8 @@ class Settings():
 	size_init = (500, 400);
 	size_min = (300, 300);
 	screen_pos = (0,0)
+	rarMode = 0
+	zipMode = 0
 
 	def __init__(self):
 		self.Config = ConfigParser.ConfigParser()
@@ -32,26 +34,47 @@ class Settings():
 				self.screen_pos = (self.Config.getint('Position', 'X'), self.Config.getint('Position', 'Y'));
 			except:
 				pass
+			try:
+				self.rarMode = self.Config.getint('ArchiveModeIndex', 'rar')
+				self.zipMode = self.Config.getint('ArchiveModeIndex', 'zip')
+			except:
+				pass
 			#Section_View = ConfigSectionMap('View');
 
 	def write(self, frame):
+		sections = ["Size", "Position", "ArchiveModeIndex"]
+		for s in sections:
+			if not self.Config.has_section(s):
+				self.Config.add_section(s)
 
-		if not self.Config.has_section('Size'):
-			self.Config.add_section('Size')
-		if not self.Config.has_section('Position'):
-			self.Config.add_section('Position')
-
-		cfgfile = open(tmpFile,'w');
+		cfgfile = open(tmpFile,'w')
 		fSize = frame.GetSizeTuple()
 		fPos = frame.GetPositionTuple()
 
-		self.Config.set('Size', 'InitWidth', fSize[0])
-		self.Config.set('Size', 'InitHeight', fSize[1])
-		self.Config.set('Size', 'MinWidth', self.size_min[0])
-		self.Config.set('Size', 'MinHeight', self.size_min[1])
+		self.Config.set('Size', 'initwidth', fSize[0])
+		self.Config.set('Size', 'initheight', fSize[1])
+		self.Config.set('Size', 'minwidth', self.size_min[0])
+		self.Config.set('Size', 'minheight', self.size_min[1])
 
 		self.Config.set('Position', 'X', fPos[0])
 		self.Config.set('Position', 'Y', fPos[1])
+
+		if frame.ZipExtractMode_01.IsChecked():
+			zipm = 1
+		elif frame.ZipExtractMode_02.IsChecked():
+			zipm = 2
+		else:
+			zipm = 0
+
+		if frame.RarExtractMode_01.IsChecked():
+			rarm = 1
+		elif frame.RarExtractMode_02.IsChecked():
+			rarm = 2
+		else:
+			rarm = 0
+
+		self.Config.set('ArchiveModeIndex', 'ZIP', zipm)
+		self.Config.set('ArchiveModeIndex', 'RAR', rarm)
 
 		#self.Config.add_section('View')
 		#self.Config.set('View', 'KeepZoom', True)

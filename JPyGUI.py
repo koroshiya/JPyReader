@@ -77,11 +77,24 @@ class JPyGUI(wx.Frame):
 		self.SetBackgroundColour(wx.BLACK)
 		self.SetTitle("JPy-Reader")
 		self.SetIcon(wx.Icon('jr.png', wx.BITMAP_TYPE_PNG))
-		self.Settings = Settings.Settings();
-		self.SetSize(self.Settings.size_init);
-		self.SetMinSize(self.Settings.size_min);
+		self.Settings = Settings.Settings()
+		self.SetSize(self.Settings.size_init)
+		self.SetMinSize(self.Settings.size_min)
 		self.SetPosition(self.Settings.screen_pos)
 		self.InitUI()
+
+		rarMode = self.Settings.rarMode
+		if rarMode == 1:
+			self.RarExtractMode_01.Check()
+		elif rarMode == 2:
+			self.RarExtractMode_02.Check()
+
+		zipMode = self.Settings.zipMode
+		if zipMode == 1:
+			self.ZipExtractMode_01.Check()
+		elif zipMode == 2:
+			self.ZipExtractMode_02.Check()
+
 		if len(sys.argv) > 1:
 			for arg in sys.argv:
 				if (self.DisplayImage(arg)):
