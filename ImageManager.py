@@ -250,18 +250,30 @@ class ImageManager():
 				return False
 
 	def PaintImage(self, jpg1):
-		self.frame.SetMaxSize(self.frame.sizes[self.frame.GetMonitor()])
+		xy = self.frame.sizes[self.frame.GetMonitor()]
+		self.frame.SetMaxSize(xy)
 		self.frame.statusbar.SetStatusText(str(self.CUR_INDEX + 1) + "/" + str(self.TOTAL_LEN + 1) + " - " + self.CACHE[1][1])
 		self.frame.spanel.FitInside();
 		self.frame.spanel.SetScrollbars(1,1,1,1)
 		self.frame.spanel.SetScrollRate(20,20)
 		
-		self.frame.spanel.SetClientSize(jpg1.GetSize())
+		xy2 = jpg1.GetSize()
+		if xy2[0] > xy[0] or xy2[1] > xy[1]:
+			self.frame.spanel.SetClientSize((0,0))
+		self.frame.spanel.SetClientSize(xy2)
 		self.frame.spanel.SetVirtualSize((1920, 1080))
-		self.frame.spanel.SetVirtualSize(jpg1.GetSize())
+		if xy2[0] > xy[0] or xy2[1] > xy[1]:
+			self.frame.spanel.SetVirtualSize((0, 0))
+		self.frame.spanel.SetVirtualSize(xy2)
+		if xy2[0] > xy[0] or xy2[1] > xy[1]:
+			self.frame.spanel.SetVirtualSize((0,0))
 		self.frame.panel.SetBitmap(jpg1);
-		self.frame.panel.SetClientSize(jpg1.GetSize());
-		self.frame.SetClientSize(jpg1.GetSize())
+		if xy2[0] > xy[0] or xy2[1] > xy[1]:
+			self.frame.panel.SetClientSize((0,0));
+		self.frame.panel.SetClientSize(xy2);
+		if xy2[0] > xy[0] or xy2[1] > xy[1]:
+			self.frame.SetClientSize((0,0))
+		self.frame.SetClientSize(xy2)
 		if (self.frame.IsFullScreen() or self.frame.IsMaximized()):
 			self.CenterImage()
 
