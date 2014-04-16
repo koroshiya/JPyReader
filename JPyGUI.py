@@ -367,8 +367,19 @@ class JPyGUI(wx.Frame):
 		info.SetIcon(self.GetIcon()) #wx.Icon('jr.png', wx.BITMAP_TYPE_PNG)
 		info.SetName("JPy-Reader")
 		info.SetVersion("1.0")
-		info.SetDescription("Test description")
+		info.SetDescription("A lightweight image viewer aimed at manga/comics.")
 		info.SetCopyright("(C) 2013 Koroshiya")
+		info.SetWebSite("https://github.com/koroshiya/JPyReader")
+
+		f = open ("./LICENSE.txt","r")
+		data = f.read()
+		data = """An easy to understand explanation of the MIT license can be found here:
+https://tldrlegal.com/license/mit-license
+
+		""" + data
+		f.close()
+		info.SetLicense(data)
+		#info.SetModal(True)
 		wx.AboutBox(info)
 
 	def DisplayImage(self, name):
@@ -386,5 +397,5 @@ class FileDrop(wx.FileDropTarget):
 
 		for name in filenames:
 			print name
-			if (self.frame.DisplayImage(name)): #TODO: fix image position on start max/full
-				return; #TODO: fix max image height when not full/max
+			if (self.frame.DisplayImage(name)):
+				return
