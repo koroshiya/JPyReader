@@ -67,6 +67,7 @@ class JPyGUI(wx.Frame):
 		self.rar = [0, [], []]
 		self.zip = [0, [], []]
 		self.SUPPORTED_FORMATS = [".png", ".jpg", ".jpeg", ".gif", ".bmp"]
+		self.SUPPORTED_ARCHIVE_FORMATS = [".zip", ".cbz", ".rar", ".cbr"]
 
 		dt = FileDrop(self)
 		dt.SetFrame(self)
@@ -101,9 +102,18 @@ class JPyGUI(wx.Frame):
 			self.ZipExtractMode_02.Check()
 
 		if len(sys.argv) > 1:
-			for arg in sys.argv:
-				if (self.DisplayImage(arg)):
-					break;
+			for name in sys.argv:
+				ext = os.path.splitext(name)[1].lower()
+				if ext.lower() in self.SUPPORTED_FORMATS:
+					if (self.DisplayImage(name)):
+						return
+				elif ext.lower() in self.SUPPORTED_ARCHIVE_FORMATS:
+					self.CloseArchives()
+					tmpDir = tempfile.gettempdir()+"/jpyreader/"+name.rsplit('/',1)[1]+"/"
+					if os.path.splitext(name)[1].lower() in [".rar", ".cbr"]:
+						self.ExtractRarFile(name, tmpDir)
+					else:
+						self.ExtractZipFile(name, tmpDir)
 
 	def InitUI(self):
 
@@ -397,6 +407,14 @@ class FileDrop(wx.FileDropTarget):
 	def OnDropFiles(self, x, y, filenames):
 
 		for name in filenames:
-			print name
-			if (self.frame.DisplayImage(name)):
-				return
+			ext = os.path.splitext(name)[1].lower()
+			if ext.lower() in self.frame.SUPPORTED_FORMATS:
+				if (self.frame.DisplayImage(name)):
+					return
+			elif ext.lower() in self.frame.SUPPORTED_ARCHIVE_FORMATS:
+				self.frame.CloseArchives()
+				tmpDir = tempfile.gettempdir()+"/jpyreader/"+name.rsplit('/',1)[1]+"/"
+				if os.path.splitext(name)[1].lower() in [".rar", ".cbr"]:
+					self.frame.ExtractRarFile(name, tmpDir)
+				else:
+					self.frame.ExtractZipFile(name, tmpDir)
