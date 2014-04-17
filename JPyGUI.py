@@ -133,13 +133,18 @@ class JPyGUI(wx.Frame):
 		self.Bind(wx.EVT_RIGHT_UP, self.image_manager.Previous)
 		self.panel.SetPosition((0,0));
 
-		self.Bind(wx.EVT_MOUSEWHEEL, self.Print)
-		self.panel.Bind(wx.EVT_MOUSEWHEEL, self.Print)
-		self.spanel.Bind(wx.EVT_MOUSEWHEEL, self.Print)
+		#self.Bind(wx.EVT_MOUSEWHEEL, self.Print)
+		#self.panel.Bind(wx.EVT_MOUSEWHEEL, self.Print)
+		#self.spanel.Bind(wx.EVT_MOUSEWHEEL, self.Print)
 		self.spanel.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 		self.spanel.SetFocus()
+		self.panel.Bind(wx.EVT_SET_FOCUS, self.onFocus)
+		self.Bind(wx.EVT_SET_FOCUS, self.onFocus)
 
 		self.Show(True)
+	
+	def onFocus(self, event):
+		self.spanel.SetFocus()
 
 	def OnKeyDown(self, e):
 		key = e.GetKeyCode()
@@ -148,6 +153,7 @@ class JPyGUI(wx.Frame):
 			self.Exit(e)
 
 	def Print(self, e):
+		print "scroll"
 		if e.ControlDown():
 			rotation = e.GetWheelRotation()
 			if rotation > 0:
