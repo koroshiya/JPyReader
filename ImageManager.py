@@ -131,7 +131,7 @@ class ImageManager():
 
 	def IsSupportedImage(self, image):
 		for format in self.frame.SUPPORTED_FORMATS:
-			if image[-len(format):] == format:
+			if image[-len(format):].lower() == format:
 				return True
 		return False
 
@@ -139,7 +139,8 @@ class ImageManager():
 		INDEXED_FILES[:] = []
 		print "Indexing files in "+curdir
 		for format in self.frame.SUPPORTED_FORMATS:
-			INDEXED_FILES.extend(glob.glob(curdir + "/*" + format));
+			INDEXED_FILES.extend(glob.glob(curdir + "/*" + format.lower()));
+			INDEXED_FILES.extend(glob.glob(curdir + "/*" + format.upper()));
 		INDEXED_FILES.sort();
 
 	def DisplayHeldImage(self, findex=0):

@@ -73,6 +73,7 @@ class JPyGUI(wx.Frame):
 		self.SetDropTarget(dt)
 
 		self.Bind(wx.EVT_CLOSE, self.Exit)
+		self.Bind(wx.EVT_MAXIMIZE, self.image_manager.Max)
 
 		self.SetBackgroundColour(wx.BLACK)
 		self.SetTitle("JPy-Reader")
@@ -162,7 +163,7 @@ class JPyGUI(wx.Frame):
 		self.SetMenuItem(menuFile, FILE_CLOSE, '&Quit\tCtrl+Q', self.Exit);
 
 		#self.SetMenuItem(menuView, VIEW_HIDE_MENU, '&Hide Menu\tCtrl+H', self.HideMenu);
-		self.SetMenuItem(menuView, VIEW_HIDE_STATUS, 'Hide &Status\tCtrl+Shift+H', self.HideStatus);
+		self.SetMenuItem(menuView, VIEW_HIDE_STATUS, '&Show/Hide Status\tCtrl+Shift+H', self.HideStatus);
 		self.SetMenuItem(menuView, VIEW_MAXIMIZE, '&Maximize\tCtrl+M', self.image_manager.Max);
 		self.SetMenuItem(menuView, VIEW_FULLSCREEN, '&Fullscreen\tCtrl+F', self.image_manager.Full);
 
@@ -235,7 +236,7 @@ class JPyGUI(wx.Frame):
 			for f in rf.infolist():
 				name = f.filename
 				ext = os.path.splitext(name)[1].lower()
-				if ext in self.SUPPORTED_FORMATS:
+				if ext.lower() in self.SUPPORTED_FORMATS:
 					try:
 						if self.RarExtractMode_00.IsChecked():
 							rf.extract(name, tmpDir)
@@ -273,7 +274,7 @@ class JPyGUI(wx.Frame):
 			for f in rf.infolist():
 				name = f.filename
 				ext = os.path.splitext(name)[1].lower()
-				if ext in self.SUPPORTED_FORMATS:
+				if ext.lower() in self.SUPPORTED_FORMATS:
 					self.rar[2].append(name)
 			self.image_manager.InitHeldImage()
 		else:
@@ -284,7 +285,7 @@ class JPyGUI(wx.Frame):
 			zfile = zipfile.ZipFile(filePath, "r")
 			for name in zfile.namelist():
 				ext = os.path.splitext(name)[1].lower()
-				if ext in self.SUPPORTED_FORMATS:
+				if ext.lower() in self.SUPPORTED_FORMATS:
 					try:
 						self.zip[2].append(name)
 						if self.ZipExtractMode_02.IsChecked():
@@ -315,7 +316,7 @@ class JPyGUI(wx.Frame):
 			self.zip[1] = filePath
 			for name in rf.namelist():
 				ext = os.path.splitext(name)[1].lower()
-				if ext in self.SUPPORTED_FORMATS:
+				if ext.lower() in self.SUPPORTED_FORMATS:
 					self.zip[2].append(name)
 			self.image_manager.InitHeldImage()
 		else:
