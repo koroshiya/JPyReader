@@ -19,6 +19,7 @@ except ImportError:
 
 from os.path import dirname
 from os.path import realpath
+import os
 from rarfile import rarfile
 import zipfile
 import cStringIO
@@ -138,9 +139,11 @@ class ImageManager():
 	def IndexFilesInDirectory(self, curdir):
 		INDEXED_FILES[:] = []
 		print "Indexing files in "+curdir
-		for format in self.frame.SUPPORTED_FORMATS:
-			INDEXED_FILES.extend(glob.glob(curdir + "/*" + format.lower()));
-			INDEXED_FILES.extend(glob.glob(curdir + "/*" + format.upper()));
+		for root, dirs, files in os.walk(curdir):
+			for name in files:
+				ext = os.path.splitext(name)[1].lower()
+				if ext.lower() in self.frame.SUPPORTED_FORMATS:
+					INDEXED_FILES.append(curdir+"/"+name)
 		INDEXED_FILES.sort();
 
 	def DisplayHeldImage(self, findex=0):
@@ -200,10 +203,11 @@ class ImageManager():
 	def IsArchiveHeld(self):
 		return self.frame.rar[0] == 1 or self.frame.zip[0] == 1
 
-	def DisplayImage(self, imageFile): 
+	def DisplayImage(self, imageFile):
 		if not self.IsSupportedImage(imageFile):
 			return False
 		self.IndexFilesInDirectory(dirname(realpath(imageFile)))
+		print dirname(realpath(imageFile))
 		self.CUR_INDEX = 0
 		for filec in INDEXED_FILES:
 			if (filec == imageFile):
@@ -215,7 +219,9 @@ class ImageManager():
 		return self.DisplayImageAtIndex()
 
 	def DisplayImageAtIndex(self):
+		#print INDEXED_FILES
 		tmpIndex = INDEXED_FILES[self.CUR_INDEX]
+		print tmpIndex
 		self.frame.Freeze()
 		try:
 			self.CACHE[1][0] = wx.Image(tmpIndex, wx.BITMAP_TYPE_ANY)
