@@ -103,7 +103,9 @@ class JPyGUI(wx.Frame):
 		elif zipMode == 2:
 			self.ZipExtractMode_02.Check()
 
-		if self.Settings.maximized:
+		if self.Settings.fullscreen:
+			self.image_manager.Full("")
+		elif self.Settings.maximized:
 			self.image_manager.Max("")
 		self.Thaw()
 

@@ -15,6 +15,7 @@ class Settings():
 	rarMode = 0
 	zipMode = 0
 	maximized = False
+	fullscreen = False
 
 	def __init__(self):
 		self.Config = ConfigParser.ConfigParser()
@@ -42,6 +43,7 @@ class Settings():
 				pass
 			try:
 				self.maximized = self.Config.getboolean('View', 'maximized')
+				self.fullscreen = self.Config.getboolean('View', 'fullscreen')
 			except Exception, e:
 				pass
 			#Section_View = ConfigSectionMap('View');
@@ -83,6 +85,7 @@ class Settings():
 
 		#self.Config.add_section('View')
 		self.Config.set('View', 'Maximized', frame.IsMaximized())
+		self.Config.set('View', 'Fullscreen', frame.IsFullScreen())
 		#self.Config.set('View', 'KeepZoom', True)
 		#self.Config.set('View', 'CurrentZoom', 100)
 		self.Config.write(cfgfile)
