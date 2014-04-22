@@ -143,7 +143,8 @@ class ImageManager():
 			for name in files:
 				ext = os.path.splitext(name)[1].lower()
 				if ext.lower() in self.frame.SUPPORTED_FORMATS:
-					INDEXED_FILES.append(curdir+"/"+name)
+					if os.path.isfile(curdir+"/"+name):
+						INDEXED_FILES.append(curdir+"/"+name)
 		INDEXED_FILES.sort();
 
 	def DisplayHeldImage(self, findex=0):
