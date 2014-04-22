@@ -58,6 +58,8 @@ class JPyGUI(wx.Frame):
 	def __init__(self, *args, **kwargs):
 		super(JPyGUI, self).__init__(*args, **kwargs)
 
+		self.Freeze()
+
 		self.SetDoubleBuffered(True)
 		self.displays = (wx.Display(i) for i in range(wx.Display.GetCount()))
 		self.sizes = [display.GetGeometry().GetSize() for display in self.displays]
@@ -101,6 +103,10 @@ class JPyGUI(wx.Frame):
 		elif zipMode == 2:
 			self.ZipExtractMode_02.Check()
 
+		if self.Settings.maximized:
+			self.image_manager.Max("")
+		self.Thaw()
+
 		if len(sys.argv) > 1:
 			for name in sys.argv:
 				ext = os.path.splitext(name)[1].lower()
@@ -114,6 +120,7 @@ class JPyGUI(wx.Frame):
 						self.ExtractRarFile(name, tmpDir)
 					else:
 						self.ExtractZipFile(name, tmpDir)
+					return
 
 	def InitUI(self):
 

@@ -14,6 +14,7 @@ class Settings():
 	screen_pos = (0,0)
 	rarMode = 0
 	zipMode = 0
+	maximized = False
 
 	def __init__(self):
 		self.Config = ConfigParser.ConfigParser()
@@ -39,10 +40,14 @@ class Settings():
 				self.zipMode = self.Config.getint('ArchiveModeIndex', 'zip')
 			except:
 				pass
+			try:
+				self.maximized = self.Config.getboolean('View', 'maximized')
+			except Exception, e:
+				pass
 			#Section_View = ConfigSectionMap('View');
 
 	def write(self, frame):
-		sections = ["Size", "Position", "ArchiveModeIndex"]
+		sections = ["Size", "Position", "ArchiveModeIndex", "View"]
 		for s in sections:
 			if not self.Config.has_section(s):
 				self.Config.add_section(s)
@@ -77,6 +82,7 @@ class Settings():
 		self.Config.set('ArchiveModeIndex', 'RAR', rarm)
 
 		#self.Config.add_section('View')
+		self.Config.set('View', 'Maximized', frame.IsMaximized())
 		#self.Config.set('View', 'KeepZoom', True)
 		#self.Config.set('View', 'CurrentZoom', 100)
 		self.Config.write(cfgfile)

@@ -40,7 +40,7 @@ class ImageManager():
 
 	def Max(self, e):
 		if (self.frame.IsMaximized()):
-			self.frame.Maximize(False);
+			self.frame.Maximize(False)
 			self.frame.panel.SetPosition((0,0))
 			#hug image
 			try:
@@ -53,8 +53,8 @@ class ImageManager():
 			finally:
 				pass
 		else:
-			self.frame.Maximize(True);
-			self.CenterImage();
+			self.frame.Maximize(True)
+			self.CenterImage()
 
 		print self.frame.panel.GetPosition();
 
