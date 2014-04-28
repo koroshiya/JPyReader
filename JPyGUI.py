@@ -103,18 +103,12 @@ class JPyGUI(wx.Frame):
 		elif zipMode == 2:
 			self.ZipExtractMode_02.Check()
 
-		if self.Settings.fullscreen:
-			self.image_manager.Full("")
-		elif self.Settings.maximized:
-			self.image_manager.Max("")
-		self.Thaw()
-
 		if len(sys.argv) > 1:
 			for name in sys.argv:
 				ext = os.path.splitext(name)[1].lower()
 				if ext.lower() in self.SUPPORTED_FORMATS:
 					if (self.DisplayImage(name)):
-						return
+						break
 				elif ext.lower() in self.SUPPORTED_ARCHIVE_FORMATS:
 					self.CloseArchives()
 					tmpDir = tempfile.gettempdir()+"/jpyreader/"+name.rsplit('/',1)[1]+"/"
@@ -122,7 +116,13 @@ class JPyGUI(wx.Frame):
 						self.ExtractRarFile(name, tmpDir)
 					else:
 						self.ExtractZipFile(name, tmpDir)
-					return
+					break
+
+		if self.Settings.fullscreen:
+			self.image_manager.Full("")
+		elif self.Settings.maximized:
+			self.image_manager.Max("")
+		self.Thaw()
 
 	def InitUI(self):
 

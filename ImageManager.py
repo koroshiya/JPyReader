@@ -76,6 +76,8 @@ class ImageManager():
 
 		width = 0 if (x > x2) else (x2 / 2 - x / 2)
 		height = 0 if (y > y2) else (y2 / 2 - y / 2)
+		print "width", width
+		print "height", height
 		self.frame.panel.SetPosition((width, height))
 
 	def Next(self, e):
