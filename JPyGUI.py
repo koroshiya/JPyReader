@@ -20,6 +20,7 @@ from threading import Thread
 import tempfile
 import zipfile
 import os
+from os.path import realpath
 import cStringIO
 import wx.lib.scrolledpanel as scrolled
 import Settings
@@ -105,11 +106,12 @@ class JPyGUI(wx.Frame):
 
 		if len(sys.argv) > 1:
 			for name in sys.argv:
+				name = realpath(name)
 				ext = os.path.splitext(name)[1].lower()
-				if ext.lower() in self.SUPPORTED_FORMATS:
+				if ext in self.SUPPORTED_FORMATS:
 					if (self.DisplayImage(name)):
 						break
-				elif ext.lower() in self.SUPPORTED_ARCHIVE_FORMATS:
+				elif ext in self.SUPPORTED_ARCHIVE_FORMATS:
 					self.CloseArchives()
 					tmpDir = tempfile.gettempdir()+"/jpyreader/"+name.rsplit('/',1)[1]+"/"
 					if os.path.splitext(name)[1].lower() in [".rar", ".cbr"]:
@@ -422,11 +424,12 @@ class FileDrop(wx.FileDropTarget):
 	def OnDropFiles(self, x, y, filenames):
 
 		for name in filenames:
+			name = realpath(name)
 			ext = os.path.splitext(name)[1].lower()
-			if ext.lower() in self.frame.SUPPORTED_FORMATS:
+			if ext in self.frame.SUPPORTED_FORMATS:
 				if (self.frame.DisplayImage(name)):
 					return
-			elif ext.lower() in self.frame.SUPPORTED_ARCHIVE_FORMATS:
+			elif ext in self.frame.SUPPORTED_ARCHIVE_FORMATS:
 				self.frame.CloseArchives()
 				tmpDir = tempfile.gettempdir()+"/jpyreader/"+name.rsplit('/',1)[1]+"/"
 				if os.path.splitext(name)[1].lower() in [".rar", ".cbr"]:
