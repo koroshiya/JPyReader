@@ -34,12 +34,35 @@ class ImageManager():
 		self.TOTAL_LEN = 0
 		self.SCALE = 1
 		self.CACHE = [["",""],["",""],["",""]]
+		self.isMaximized = False
 
 	def SetFrame(self, frame):
 		self.frame = frame;
+		
+	def Resize(self, e):
+		if self.isMaximized and not self.frame.IsMaximized():
+			self.isMaximized = False
+			self.frame.panel.SetPosition((0,0))
+			#hug image
+			try:
+				x, y = wx.Image(INDEXED_FILES[self.CUR_INDEX], wx.BITMAP_TYPE_ANY).GetSize()
+				self.frame.SetSize(x,y)
+			except Exception, ex:
+				pass
+			else:
+				pass
+			finally:
+				pass
+		elif self.frame.IsMaximized():
+			self.isMaximized = True
+			self.CenterImage()
+		else:
+			self.isMaximized = False
+		e.Skip()
 
 	def Max(self, e):
 		if (self.frame.IsMaximized()):
+			self.isMaximized = False
 			self.frame.Maximize(False)
 			self.frame.panel.SetPosition((0,0))
 			#hug image
@@ -53,6 +76,7 @@ class ImageManager():
 			finally:
 				pass
 		else:
+			self.isMaximized = True
 			self.frame.Maximize(True)
 			self.CenterImage()
 

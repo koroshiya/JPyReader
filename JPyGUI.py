@@ -78,6 +78,7 @@ class JPyGUI(wx.Frame):
 
 		self.Bind(wx.EVT_CLOSE, self.Exit)
 		self.Bind(wx.EVT_MAXIMIZE, self.image_manager.Max)
+		self.Bind(wx.EVT_SIZE, self.image_manager.Resize)
 
 		self.SetBackgroundColour(wx.BLACK)
 		self.SetTitle("JPy-Reader")
