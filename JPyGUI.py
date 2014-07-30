@@ -35,6 +35,11 @@ VIEW_HIDE_MENU = 700
 VIEW_HIDE_STATUS = 701
 VIEW_MAXIMIZE = 702
 VIEW_FULLSCREEN = 703
+VIEW_ZOOM = 704
+
+ZOOM_ONE = 100
+ZOOM_TWO_THIRD = 67
+ZOOM_HALF = 50
 
 CMD_PREVIOUS = 801
 CMD_NEXT = 802
@@ -164,17 +169,17 @@ class JPyGUI(wx.Frame):
 		if key == wx.WXK_ESCAPE:
 			self.Exit(e)
 
-	def Print(self, e):
+	def Print(self, e): #TODO: try to reimplement ctrl + scroll
 		print "scroll"
 		if e.ControlDown():
 			rotation = e.GetWheelRotation()
 			if rotation > 0:
-				if self.SCALE < 5:
-					self.SCALE += 0.25
+				if self.image_manager.SCALE < 5:
+					self.image_manager.SCALE += 0.25
 			else:
-				if self.SCALE > 0.25:
-					self.SCALE -= 0.25
-			self.DisplayCachedImage();
+				if self.image_manager.SCALE > 0.25:
+					self.image_manager.SCALE -= 0.25
+			self.image_manager.DisplayImageAtIndex();
 
 	def ConstructMenu(self):
 
@@ -194,6 +199,16 @@ class JPyGUI(wx.Frame):
 		self.SetMenuItem(menuView, VIEW_HIDE_STATUS, '&Show/Hide Status\tCtrl+Shift+H', self.HideStatus);
 		self.SetMenuItem(menuView, VIEW_MAXIMIZE, '&Maximize\tCtrl+M', self.image_manager.Max);
 		self.SetMenuItem(menuView, VIEW_FULLSCREEN, '&Fullscreen\tCtrl+F', self.image_manager.Full);
+
+		zoomMenu = wx.Menu()
+		self.Zoom_100 = zoomMenu.Append(ZOOM_ONE, '100%', kind=wx.ITEM_RADIO) #self.image_manager.SetZipMode(0)
+		self.Zoom_66 = zoomMenu.Append(ZOOM_TWO_THIRD, '66%', kind=wx.ITEM_RADIO)
+		self.Zoom_50 = zoomMenu.Append(ZOOM_HALF, '50%', kind=wx.ITEM_RADIO)
+		menuView.AppendMenu(VIEW_ZOOM, "Zoom", zoomMenu)
+
+		self.Bind(wx.EVT_MENU, self.ChangeZoom, id=ZOOM_ONE)
+		self.Bind(wx.EVT_MENU, self.ChangeZoom, id=ZOOM_TWO_THIRD)
+		self.Bind(wx.EVT_MENU, self.ChangeZoom, id=ZOOM_HALF)
 
 		self.SetMenuItem(menuCommands, CMD_PREVIOUS, '&Previous\tCtrl+LEFT', self.image_manager.Previous);
 		self.SetMenuItem(menuCommands, CMD_NEXT, '&Next\tCtrl+RIGHT', self.image_manager.Next);
@@ -232,6 +247,15 @@ class JPyGUI(wx.Frame):
 		mItem = wx.MenuItem(menu, idn, text)
 		menu.AppendItem(mItem)
 		self.Bind(wx.EVT_MENU, event, id=idn)
+
+	def ChangeZoom(self, evt):
+	    if self.Zoom_50.IsChecked():
+	    	self.image_manager.SCALE = 0.5
+	    elif self.Zoom_66.IsChecked():
+	    	self.image_manager.SCALE = 0.67
+	    else:
+	    	self.image_manager.SCALE = 1
+	    self.image_manager.DisplayImageAtIndex()
 
 	def OpenArchive(self, e):
 		openFileDialog = wx.FileDialog(self, "Open Archive file", "", "", "Archives (zip, cbz, rar, cbr)|*.zip;*.cbz;*.rar;*.cbr", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)

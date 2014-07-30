@@ -1,0 +1,3 @@
+
+Fix centering of content where bottom half is cut off, no scrollbars shown (maybe CenterImage function height check)
+X position check on center with wide image
