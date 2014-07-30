@@ -473,19 +473,19 @@ Ctrl + Scroll       Zoom in/out
 	def CheckArg(self, name):
 		name = realpath(name)
 		ext = os.path.splitext(name)[1].lower()
-		if ext in self.frame.SUPPORTED_FORMATS:
-			if (self.frame.DisplayImage(name)):
+		if ext in self.SUPPORTED_FORMATS:
+			if (self.DisplayImage(name)):
 				return False
 		elif os.path.isdir(name):
-			self.frame.LoadFolder(name)
+			self.LoadFolder(name)
 			return False
-		elif ext in self.frame.SUPPORTED_ARCHIVE_FORMATS:
-			self.frame.CloseArchives()
+		elif ext in self.SUPPORTED_ARCHIVE_FORMATS:
+			self.CloseArchives()
 			tmpDir = tempfile.gettempdir()+"/jpyreader/"+name.rsplit('/',1)[1]+"/"
 			if ext in [".rar", ".cbr"]:
-				self.frame.ExtractRarFile(name, tmpDir)
+				self.ExtractRarFile(name, tmpDir)
 			else:
-				self.frame.ExtractZipFile(name, tmpDir)
+				self.ExtractZipFile(name, tmpDir)
 			return False
 		else:
 			return True
