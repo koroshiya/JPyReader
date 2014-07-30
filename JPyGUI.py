@@ -58,6 +58,7 @@ CMD_RAR_READ = 822
 CMD_RAR_RAM = 823
 
 HELP_ABOUT = 900
+HELP_HOTKEYS = 901
 
 class JPyGUI(wx.Frame):
 
@@ -168,6 +169,12 @@ class JPyGUI(wx.Frame):
         
 		if key == wx.WXK_ESCAPE:
 			self.Exit(e)
+		elif key == wx.WXK_RIGHT:
+			self.image_manager.Next(e)
+		elif key == wx.WXK_LEFT:
+			self.image_manager.Previous(e)
+		else:
+			print "Pressed key", key
 
 	def Print(self, e):
 		if e.ControlDown():
@@ -211,10 +218,10 @@ class JPyGUI(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.ChangeZoom, id=ZOOM_TWO_THIRD)
 		self.Bind(wx.EVT_MENU, self.ChangeZoom, id=ZOOM_HALF)
 
-		self.SetMenuItem(menuCommands, CMD_PREVIOUS, '&Previous\tCtrl+LEFT', self.image_manager.Previous);
-		self.SetMenuItem(menuCommands, CMD_NEXT, '&Next\tCtrl+RIGHT', self.image_manager.Next);
-		self.SetMenuItem(menuCommands, CMD_FIRST, '&First\tCtrl+Shift+LEFT', self.image_manager.First);
-		self.SetMenuItem(menuCommands, CMD_LAST, '&Last\tCtrl+Shift+RIGHT', self.image_manager.Last);
+		self.SetMenuItem(menuCommands, CMD_PREVIOUS, '&Previous\tLEFT', self.image_manager.Previous);
+		self.SetMenuItem(menuCommands, CMD_NEXT, '&Next\tRIGHT', self.image_manager.Next);
+		self.SetMenuItem(menuCommands, CMD_FIRST, '&First\tCtrl+LEFT', self.image_manager.First);
+		self.SetMenuItem(menuCommands, CMD_LAST, '&Last\tCtrl+RIGHT', self.image_manager.Last);
 		menuCommands.AppendSeparator();
 		self.SetMenuItem(menuCommands, CMD_JUMP, '&Jump to page...\tCtrl+J', self.image_manager.JumpToPage)
 
@@ -232,6 +239,7 @@ class JPyGUI(wx.Frame):
 		menuSettings.AppendMenu(CMD_RAR, "RAR Files", rarMenu)
 
 		self.SetMenuItem(menuHelp, HELP_ABOUT, '&About', self.About);
+		self.SetMenuItem(menuHelp, HELP_HOTKEYS, '&Hotkeys', self.Hotkeys);
 
 		#menuItemOpen.SetBitmap(wx.Bitmap('file.png'))
 
@@ -435,6 +443,28 @@ https://tldrlegal.com/license/mit-license
 		info.SetLicense(data)
 		#info.SetModal(True)
 		wx.AboutBox(info)
+
+	def Hotkeys(self, e):
+		hotkeys = """
+		File
+Ctrl + O            Open Folder
+Ctrl + Z            Open Archive
+Ctrl + Q            Exit
+
+		Commands
+Right Arrow         Next Image
+Left Arrow          Previous Image
+Ctrl + Right        Last Image
+Ctrl + Left         First Image
+Ctrl + J            Jump to Image
+
+		View
+Ctrl + Shift + H    Hide Menu
+Ctrl + M            Maximize
+Ctrl + F            Fullscreen
+Ctrl + Scroll       Zoom in/out
+		"""
+		wx.MessageBox(hotkeys, 'Hotkeys', wx.OK | wx.ICON_INFORMATION)
 
 	def DisplayImage(self, name):
 		self.image_manager.DisplayImage(name)
