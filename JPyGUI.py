@@ -150,9 +150,9 @@ class JPyGUI(wx.Frame):
 		self.Bind(wx.EVT_RIGHT_UP, self.image_manager.Previous)
 		self.panel.SetPosition((0,0));
 
-		#self.Bind(wx.EVT_MOUSEWHEEL, self.Print)
-		#self.panel.Bind(wx.EVT_MOUSEWHEEL, self.Print)
-		#self.spanel.Bind(wx.EVT_MOUSEWHEEL, self.Print)
+		self.Bind(wx.EVT_MOUSEWHEEL, self.Print)
+		self.panel.Bind(wx.EVT_MOUSEWHEEL, self.Print)
+		self.spanel.Bind(wx.EVT_MOUSEWHEEL, self.Print)
 		self.spanel.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 		self.spanel.SetFocus()
 		self.panel.Bind(wx.EVT_SET_FOCUS, self.onFocus)
@@ -169,8 +169,7 @@ class JPyGUI(wx.Frame):
 		if key == wx.WXK_ESCAPE:
 			self.Exit(e)
 
-	def Print(self, e): #TODO: try to reimplement ctrl + scroll
-		print "scroll"
+	def Print(self, e):
 		if e.ControlDown():
 			rotation = e.GetWheelRotation()
 			if rotation > 0:
@@ -180,6 +179,8 @@ class JPyGUI(wx.Frame):
 				if self.image_manager.SCALE > 0.25:
 					self.image_manager.SCALE -= 0.25
 			self.image_manager.DisplayImageAtIndex();
+		else:
+			e.Skip()
 
 	def ConstructMenu(self):
 
