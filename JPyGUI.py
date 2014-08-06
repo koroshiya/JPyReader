@@ -113,7 +113,7 @@ class JPyGUI(wx.Frame):
 
 		if len(sys.argv) > 1:
 			for name in sys.argv:
-				if not self.frame.CheckArg(name):
+				if not self.CheckArg(name):
 					break
 
 		if self.Settings.fullscreen:
