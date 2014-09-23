@@ -25,6 +25,9 @@ import zipfile
 import cStringIO
 import glob
 
+reload(sys)
+sys.setdefaultencoding("utf-8")
+
 INDEXED_FILES = []
 
 class ImageManager():
