@@ -474,9 +474,11 @@ Ctrl + Scroll       Zoom in/out
 		name = realpath(name)
 		ext = os.path.splitext(name)[1].lower()
 		if ext in self.SUPPORTED_FORMATS:
+			self.CloseArchives()
 			if (self.DisplayImage(name)):
 				return False
 		elif os.path.isdir(name):
+			self.CloseArchives()
 			self.LoadFolder(name)
 			return False
 		elif ext in self.SUPPORTED_ARCHIVE_FORMATS:
